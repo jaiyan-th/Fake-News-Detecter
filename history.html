@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head><title>Prediction History</title></head>
+<body>
+    <h2>Your Prediction History</h2>
+
+    <form method="POST" action="{{ url_for('clear_history') }}">
+        <button type="submit">Clear History</button>
+    </form>
+
+    <ul>
+        {% for record in records %}
+            <li>
+                <strong>News:</strong> {{ record.news }}<br>
+                <strong>Prediction:</strong> {{ record.prediction }}<br>
+                <strong>Time:</strong> {{ record.timestamp }}
+            </li><br>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('home') }}">Back</a>
+</body>
+</html>

@@ -1,0 +1,7 @@
+# Placeholder for requirements.txt
+flask
+flask-cors
+pymongo
+joblib
+scikit-learn
+pandas
