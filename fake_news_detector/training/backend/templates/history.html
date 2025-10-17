@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History - FakeCheck</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-bottom: 3px solid #dc2626;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo-section h1 {
+            color: #dc2626;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .nav-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #b91c1c;
+        }
+
+        .nav-btn.secondary {
+            background: transparent;
+            color: #dc2626;
+            border: 2px solid #dc2626;
+        }
+
+        .nav-btn.secondary:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .page-title {
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .history-stats {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            border: 2px solid #fecaca;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 12px;
+            background: #f9fafb;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-number.real {
+            color: #166534;
+        }
+
+        .stat-number.fake {
+            color: #991b1b;
+        }
+
+        .stat-number.total {
+            color: #dc2626;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .history-table {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 2px solid #fecaca;
+        }
+
+        .table-header {
+            background: #dc2626;
+            color: white;
+            padding: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .table-content {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            transition: background 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: #f9fafb;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .prediction-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .prediction-badge.real {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534;
+            border: 2px solid #22c55e;
+        }
+
+        .prediction-badge.fake {
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+            color: #991b1b;
+            border: 2px solid #dc2626;
+        }
+
+        .item-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: #6b7280;
+            flex-wrap: wrap;
+        }
+
+        .item-content {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #dc2626;
+        }
+
+        .item-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-text {
+            color: #6b7280;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .item-text.expanded {
+            display: block;
+            -webkit-line-clamp: unset;
+            line-clamp: unset;
+            overflow: visible;
+        }
+
+        .expand-btn {
+            background: none;
+            border: none;
+            color: #dc2626;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .expand-btn:hover {
+            text-decoration: underline;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6b7280;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #374151;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .item-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>📰 FakeCheck</h1>
+            </div>
+            <div class="header-nav">
+                <a href="/" class="nav-btn secondary">Dashboard</a>
+                <a href="/logout" class="nav-btn">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1 class="page-title">Analysis History</h1>
+
+        {% if predictions %}
+        <!-- Statistics -->
+        <div class="history-stats">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number total">{{ predictions|length }}</div>
+                    <div class="stat-label">Total Analyzed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number real">{{ predictions|selectattr("prediction", "equalto", "REAL")|list|length
+                        }}</div>
+                    <div class="stat-label">Real News</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number fake">{{ predictions|selectattr("prediction", "equalto", "FAKE")|list|length
+                        }}</div>
+                    <div class="stat-label">Fake News</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number total">{{ "%.1f"|format((predictions|map(attribute="confidence")|sum /
+                        predictions|length * 100)) }}%</div>
+                    <div class="stat-label">Avg Confidence</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Table -->
+        <div class="history-table">
+            <div class="table-header">
+                Recent Analysis Results
+            </div>
+            <div class="table-content">
+                {% for prediction in predictions %}
+                <div class="history-item">
+                    <div class="item-header">
+                        <div class="prediction-badge {{ prediction.prediction.lower() }}">
+                            {% if prediction.prediction == 'REAL' %}✅{% else %}❌{% endif %}
+                            {{ prediction.prediction }}
+                            ({{ "%.0f"|format(prediction.confidence * 100) }}%)
+                        </div>
+                        <div class="item-meta">
+                            <span>📅 {{ prediction.timestamp.strftime('%Y-%m-%d %H:%M') }}</span>
+                            <span>📂 {{ prediction.category or 'General' }}</span>
+                            {% if prediction.source_url %}
+                            <span>🔗 URL Source</span>
+                            {% else %}
+                            <span>📝 Text Input</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="item-content">
+                        {% if prediction.title and prediction.title != prediction.news[:50] %}
+                        <div class="item-title">{{ prediction.title }}</div>
+                        {% endif %}
+                        <div class="item-text" id="text-{{ loop.index }}">
+                            {{ prediction.news }}
+                        </div>
+                        {% if prediction.news|length > 200 %}
+                        <button class="expand-btn" onclick="toggleExpand('{{ loop.index }}')"></button>
+                        Show more
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="history-table">
+            <div class="table-header">
+                Analysis History
+            </div>
+            <div class="empty-state">
+                <h3>No Analysis History</h3>
+                <p>You haven't analyzed any articles yet. Go to the dashboard to start analyzing news content.</p>
+                <a href="/" class="nav-btn" style="display: inline-block; margin-top: 1rem;">Start Analyzing</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function toggleExpand(index) {
+            const textElement = document.getElementById(`text-${index}`);
+            const button = textElement.nextElementSibling;
+
+            if (textElement.classList.contains('expanded')) {
+                // Collapse text - show only 3 lines
+                textElement.classList.remove('expanded');
+                button.textContent = 'Show more';
+            } else {
+                // Expand text - show all content
+                textElement.classList.add('expanded');
+                button.textContent = 'Show less';
+            }
+        }
+    </script>
+</body>
+
+</html>
