@@ -1,0 +1,1015 @@
+/* Card Grid Layout System - Pinterest-like masonry grid */
+
+:root {
+    --card-width: 300px;
+    --gap: 20px;
+    --columns: 3;
+    --border-radius: 12px;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.2);
+    --transition-fast: 0.2s ease;
+    --transition-medium: 0.3s ease;
+    --color-real: #10b981;
+    --color-fake: #ef4444;
+    --color-text-primary: #1f2937;
+    --color-text-secondary: #6b7280;
+    --color-background: #f9fafb;
+    --color-surface: #ffffff;
+}
+
+/* Main Grid Container */
+.card-grid {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--gap);
+    background-color: var(--color-background);
+}
+
+.card-grid-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
+    gap: var(--gap);
+    align-items: start;
+}
+
+/* Card Base Styles */
+.news-card {
+    background: var(--color-surface);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    overflow: hidden;
+    transition: all var(--transition-medium);
+    cursor: pointer;
+    position: relative;
+    animation: cardFadeIn 0.5s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes cardFadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.news-card:hover,
+.news-card:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-heavy);
+    outline: none;
+}
+
+.news-card:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.news-card.card-clicked {
+    transform: scale(0.98);
+}
+
+/* Card Container */
+.card-container {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Image Section */
+.card-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background-color: #f3f4f6;
+}
+
+.card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all var(--transition-medium);
+    opacity: 0;
+}
+
+.card-image-skeleton {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.news-card:hover .card-overlay {
+    opacity: 1;
+}
+
+.news-card:hover .card-image {
+    transform: scale(1.05);
+}
+
+/* Content Section */
+.card-content {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--color-text-primary);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-source {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+.card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.card-excerpt {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Tags */
+.card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tag {
+    background-color: #f3f4f6;
+    color: var(--color-text-secondary);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.tag-more {
+    background-color: #e5e7eb;
+    color: var(--color-text-secondary);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* Footer Section */
+.card-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: auto;
+}
+
+/* Prediction Badge */
+.prediction-container {
+    display: flex;
+    align-items: center;
+}
+
+.prediction-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all var(--transition-fast);
+}
+
+.prediction-badge.real {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--color-real);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.prediction-badge.fake {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--color-fake);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.prediction-icon {
+    font-size: 14px;
+}
+
+.prediction-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.prediction-label {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* Confidence Bar */
+.confidence-bar {
+    width: 60px;
+    height: 3px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.confidence-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: all var(--transition-fast);
+    transform-origin: left;
+}
+
+.prediction-badge.real .confidence-fill {
+    background-color: var(--color-real);
+}
+
+.prediction-badge.fake .confidence-fill {
+    background-color: var(--color-fake);
+}
+
+.confidence-text {
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+/* Metadata */
+.card-metadata {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.card-timestamp {
+    font-weight: 500;
+}
+
+.card-author {
+    font-style: italic;
+}
+
+/* Action Buttons */
+.card-actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all var(--transition-fast);
+}
+
+.news-card:hover .card-actions,
+.news-card:focus-within .card-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    backdrop-filter: blur(10px);
+}
+
+.action-btn:hover {
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    transform: scale(1.1);
+}
+
+.action-btn:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.action-btn.bookmarked {
+    background-color: #3b82f6;
+    color: white;
+}
+
+/* Loading States */
+.card-grid-loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    grid-column: 1 / -1;
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #f3f4f6;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error States */
+.error-message {
+    grid-column: 1 / -1;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 16px;
+    border-radius: var(--border-radius);
+    text-align: center;
+    margin: 20px 0;
+}
+
+.error-message button {
+    background-color: #dc2626;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background-color: var(--color-text-primary);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 1000;
+    transition: transform var(--transition-medium);
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Advanced Responsive Grid System */
+
+/* Extra Large Screens (1400px+) - 5 columns */
+@media (min-width: 1400px) {
+    :root {
+        --card-width: 260px;
+        --columns: 5;
+    }
+
+    .card-grid-content {
+        grid-template-columns: repeat(5, 1fr);
+        max-width: 1400px;
+    }
+}
+
+/* Large Screens (1200px - 1399px) - 4 columns */
+@media (min-width: 1200px) and (max-width: 1399px) {
+    :root {
+        --card-width: 280px;
+        --columns: 4;
+    }
+
+    .card-grid-content {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Medium-Large Screens (1024px - 1199px) - 3 columns */
+@media (min-width: 1024px) and (max-width: 1199px) {
+    :root {
+        --card-width: 300px;
+        --columns: 3;
+    }
+
+    .card-grid-content {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Medium Screens (768px - 1023px) - 2-3 columns */
+@media (min-width: 768px) and (max-width: 1023px) {
+    :root {
+        --card-width: 320px;
+        --gap: 18px;
+        --columns: 2;
+    }
+
+    .card-grid {
+        padding: var(--gap);
+    }
+
+    .card-grid-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .card-content {
+        padding: 18px;
+    }
+
+    .card-title {
+        font-size: 17px;
+    }
+}
+
+/* Small Screens (480px - 767px) - 1 column */
+@media (min-width: 480px) and (max-width: 767px) {
+    :root {
+        --card-width: 100%;
+        --gap: 16px;
+        --columns: 1;
+    }
+
+    .card-grid {
+        padding: var(--gap);
+    }
+
+    .card-grid-content {
+        grid-template-columns: 1fr;
+    }
+
+    .card-content {
+        padding: 16px;
+    }
+
+    .card-title {
+        font-size: 16px;
+    }
+
+    .card-actions {
+        position: static;
+        opacity: 1;
+        transform: none;
+        justify-content: center;
+        margin-top: 12px;
+    }
+
+    .action-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .card-image-wrapper {
+        height: 180px;
+    }
+}
+
+/* Extra Small Screens (320px - 479px) - 1 column optimized */
+@media (max-width: 479px) {
+    :root {
+        --gap: 12px;
+        --columns: 1;
+    }
+
+    .card-grid {
+        padding: var(--gap);
+    }
+
+    .card-grid-content {
+        grid-template-columns: 1fr;
+    }
+
+    .card-image-wrapper {
+        height: 160px;
+    }
+
+    .card-content {
+        padding: 12px;
+    }
+
+    .card-title {
+        font-size: 15px;
+        line-height: 1.3;
+    }
+
+    .card-excerpt {
+        font-size: 13px;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+
+    .prediction-badge {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+
+    .card-metadata {
+        font-size: 11px;
+    }
+}
+
+/* Container Query Support (Future-proofing) */
+@supports (container-type: inline-size) {
+    .card-grid {
+        container-type: inline-size;
+    }
+
+    @container (min-width: 1400px) {
+        .card-grid-content {
+            grid-template-columns: repeat(5, 1fr);
+        }
+    }
+
+    @container (min-width: 1200px) and (max-width: 1399px) {
+        .card-grid-content {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    @container (min-width: 1024px) and (max-width: 1199px) {
+        .card-grid-content {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @container (min-width: 768px) and (max-width: 1023px) {
+        .card-grid-content {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @container (max-width: 767px) {
+        .card-grid-content {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+/* Dynamic Grid Auto-fit (Alternative approach) */
+.card-grid-auto {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: var(--gap);
+    align-items: start;
+}
+
+/* Masonry-like behavior with CSS Grid (Experimental) */
+@supports (grid-template-rows: masonry) {
+    .card-grid-masonry .card-grid-content {
+        grid-template-rows: masonry;
+        align-tracks: start;
+    }
+}
+
+/* Fallback for older browsers */
+@supports not (display: grid) {
+    .card-grid-content {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .news-card {
+        width: calc(33.333% - 14px);
+        margin-bottom: var(--gap);
+    }
+
+    @media (max-width: 1023px) {
+        .news-card {
+            width: calc(50% - 10px);
+        }
+    }
+
+    @media (max-width: 767px) {
+        .news-card {
+            width: 100%;
+        }
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .news-card {
+        border: 2px solid var(--color-text-primary);
+    }
+
+    .prediction-badge.real {
+        background-color: var(--color-real);
+        color: white;
+    }
+
+    .prediction-badge.fake {
+        background-color: var(--color-fake);
+        color: white;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+
+    .news-card,
+    .card-image,
+    .card-overlay,
+    .confidence-fill,
+    .action-btn,
+    .toast {
+        transition: none;
+    }
+
+    .card-image-skeleton {
+        animation: none;
+        background: #f0f0f0;
+    }
+
+    .loading-spinner {
+        animation: none;
+        border-top-color: transparent;
+    }
+
+    @keyframes cardFadeIn {
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+}
+
+/* Print styles */
+@media print {
+    .card-grid {
+        display: block;
+    }
+
+    .news-card {
+        break-inside: avoid;
+        margin-bottom: 20px;
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+
+    .card-actions,
+    .card-grid-loader {
+        display: none;
+    }
+}
+
+/* Ad
+vanced Grid Layout Utilities */
+
+/* Grid Layout Variants */
+.card-grid--compact {
+    --gap: 12px;
+    --card-width: 250px;
+}
+
+.card-grid--spacious {
+    --gap: 32px;
+    --card-width: 350px;
+}
+
+.card-grid--dense {
+    grid-auto-flow: dense;
+}
+
+/* Dynamic Column Classes */
+.grid-cols-1 {
+    grid-template-columns: repeat(1, 1fr) !important;
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+}
+
+.grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr) !important;
+}
+
+.grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr) !important;
+}
+
+.grid-cols-5 {
+    grid-template-columns: repeat(5, 1fr) !important;
+}
+
+/* Aspect Ratio Utilities for Cards */
+.card-aspect-square .card-image-wrapper {
+    aspect-ratio: 1;
+}
+
+.card-aspect-video .card-image-wrapper {
+    aspect-ratio: 16/9;
+}
+
+.card-aspect-photo .card-image-wrapper {
+    aspect-ratio: 4/3;
+}
+
+.card-aspect-portrait .card-image-wrapper {
+    aspect-ratio: 3/4;
+}
+
+/* Grid Gap Utilities */
+.gap-xs {
+    --gap: 8px;
+}
+
+.gap-sm {
+    --gap: 12px;
+}
+
+.gap-md {
+    --gap: 20px;
+}
+
+.gap-lg {
+    --gap: 28px;
+}
+
+.gap-xl {
+    --gap: 36px;
+}
+
+/* Responsive Visibility */
+.hide-mobile {
+    display: block;
+}
+
+.hide-tablet {
+    display: block;
+}
+
+.hide-desktop {
+    display: block;
+}
+
+.show-mobile {
+    display: none;
+}
+
+.show-tablet {
+    display: none;
+}
+
+.show-desktop {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .hide-mobile {
+        display: none;
+    }
+
+    .show-mobile {
+        display: block;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .hide-tablet {
+        display: none;
+    }
+
+    .show-tablet {
+        display: block;
+    }
+}
+
+@media (min-width: 1024px) {
+    .hide-desktop {
+        display: none;
+    }
+
+    .show-desktop {
+        display: block;
+    }
+}
+
+/* Grid Animation Classes */
+.grid-animate-in .news-card {
+    animation-delay: calc(var(--animation-order, 0) * 100ms);
+}
+
+.grid-stagger .news-card:nth-child(1) {
+    animation-delay: 0ms;
+}
+
+.grid-stagger .news-card:nth-child(2) {
+    animation-delay: 100ms;
+}
+
+.grid-stagger .news-card:nth-child(3) {
+    animation-delay: 200ms;
+}
+
+.grid-stagger .news-card:nth-child(4) {
+    animation-delay: 300ms;
+}
+
+.grid-stagger .news-card:nth-child(5) {
+    animation-delay: 400ms;
+}
+
+.grid-stagger .news-card:nth-child(n+6) {
+    animation-delay: 500ms;
+}
+
+/* Performance Optimizations */
+.card-grid-content {
+    contain: layout style paint;
+    will-change: transform;
+}
+
+.news-card {
+    contain: layout style paint;
+}
+
+.news-card:hover {
+    will-change: transform, box-shadow;
+}
+
+/* Intersection Observer Loading States */
+.card-grid-loading {
+    position: relative;
+}
+
+.card-grid-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+    animation: loading-bar 2s infinite;
+}
+
+@keyframes loading-bar {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Grid Layout Debug Mode */
+.card-grid--debug .card-grid-content {
+    background-image:
+        linear-gradient(rgba(255, 0, 0, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.1) 1px, transparent 1px);
+    background-size: var(--gap) var(--gap);
+}
+
+.card-grid--debug .news-card {
+    outline: 1px dashed rgba(255, 0, 0, 0.3);
+}
+
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+
+    .card-grid-content,
+    .news-card,
+    .card-image,
+    .card-overlay,
+    .confidence-fill,
+    .action-btn,
+    .toast {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus Management */
+.card-grid:focus-within .news-card:not(:focus-within) {
+    opacity: 0.7;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .card-grid-content {
+        gap: calc(var(--gap) + 4px);
+    }
+
+    .news-card {
+        border: 2px solid;
+        box-shadow: none;
+    }
+
+    .news-card:hover,
+    .news-card:focus-visible {
+        border-width: 3px;
+        transform: none;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-text-primary: #f9fafb;
+        --color-text-secondary: #d1d5db;
+        --color-background: #111827;
+        --color-surface: #1f2937;
+        --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.3);
+        --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.4);
+        --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-image-skeleton {
+        background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    }
+
+    .tag {
+        background-color: #374151;
+        color: #d1d5db;
+    }
+
+    .action-btn {
+        background-color: rgba(31, 41, 55, 0.9);
+        color: #d1d5db;
+    }
+
+    .action-btn:hover {
+        background-color: #374151;
+        color: #f9fafb;
+    }
+}

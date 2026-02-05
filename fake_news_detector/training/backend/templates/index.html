@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fake News Detector</title>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/static/style.css" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Preload critical resources -->
+  <link rel="preload" href="/static/js/components/ArticleList.js" as="script">
+  <link rel="preload" href="/static/js/components/NewsCard.js" as="script">
+
+  <!-- Meta tags for better SEO and social sharing -->
+  <meta name="description" content="Advanced fake news detection with clean, modern interface">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📰%3C/text%3E%3C/svg%3E">
+</head>
+
+<body>
+
+  <!-- Header with navigation -->
+  <header class="answersq-header" role="banner">
+    <div class="header-container">
+      <div class="header-brand">
+        <h1 class="app-title">
+          <span class="app-icon" aria-hidden="true">📰</span>
+          Fake News Detector
+        </h1>
+      </div>
+
+      <nav class="header-nav" role="navigation" aria-label="Main navigation">
+        <a href="/" class="nav-link">Home</a>
+        <a href="#main-content" class="nav-link">Browse Articles</a>
+        {% if username %}
+        <a href="/profile" class="nav-link">Profile</a>
+        <a href="/logout" class="btn-logout"
+          style="text-decoration: none; padding: 8px 16px; background: #dc3545; color: white; border-radius: 6px; font-size: 14px;">Logout</a>
+        {% else %}
+        <button class="nav-btn secondary" id="loginBtn" aria-label="Login">
+          Login
+        </button>
+        <button class="nav-btn secondary" id="signupBtn" aria-label="Sign Up">
+          Sign Up
+        </button>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section with Analysis Form -->
+  <section class="hero-section">
+    <div class="hero-container">
+
+      <!-- Analysis Form Container -->
+      <div class="analysis-form-container">
+        <div class="tabs">
+          <button type="button" class="tab-btn active" onclick="switchTab('text')" id="tab-text">Paste Text</button>
+          <button type="button" class="tab-btn" onclick="switchTab('url')" id="tab-url">Analyze URL</button>
+        </div>
+
+        <form id="newsForm" onsubmit="submitNews(event)">
+          <!-- Text Input Area -->
+          <div id="text-input-group" class="form-group">
+            <label for="newsTextarea" class="form-label">News Article Text</label>
+            <textarea id="newsTextarea" class="form-textarea" placeholder="Paste the news article text here..."
+              aria-describedby="textareaHelp"></textarea>
+          </div>
+
+          <!-- URL Input Area (Hidden by default) -->
+          <div id="url-input-group" class="form-group" style="display: none;">
+            <label for="newsUrlInput" class="form-label">News Article URL</label>
+            <input type="url" id="newsUrlInput" class="form-input" placeholder="https://example.com/article..."
+              aria-describedby="urlHelp">
+          </div>
+
+          <div class="form-actions" style="margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary" id="analyzeBtn" style="width: 100%;">
+              <span class="btn-text">Analyze content</span>
+              <span class="btn-spinner" style="display: none;" aria-hidden="true"> ⟳ </span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Main content area -->
+  <main id="main-content" class="app-main" role="main">
+    <!-- Filter and sort controls -->
+    <section class="controls-section" aria-label="Filter and sort controls">
+      <div class="controls-container">
+        <div class="filter-group">
+          <label for="predictionFilter" class="filter-label">Filter by prediction:</label>
+          <select id="predictionFilter" class="filter-select" aria-label="Filter by prediction type">
+            <option value="">All Predictions</option>
+            <option value="REAL">Real News</option>
+            <option value="FAKE">Fake News</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="sortSelect" class="filter-label">Sort by:</label>
+          <select id="sortSelect" class="filter-select" aria-label="Sort articles by">
+            <option value="timestamp">Latest First</option>
+            <option value="confidence">Confidence</option>
+            <option value="username">Author</option>
+          </select>
+        </div>
+
+        <div class="stats-display" id="statsDisplay" aria-live="polite">
+          <span class="stat-item">
+            <span class="stat-label">Total:</span>
+            <span class="stat-value" id="totalCount">0</span>
+          </span>
+          <span class="stat-item">
+            <span class="stat-label">Real:</span>
+            <span class="stat-value real" id="realCount">0</span>
+          </span>
+          <span class="stat-item">
+            <span class="stat-label">Fake:</span>
+            <span class="stat-value fake" id="fakeCount">0</span>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Article List Container -->
+    <section class="articles-section" aria-label="News articles list">
+      <div id="articleList" class="article-list" role="region" aria-label="News articles in list format">
+        <!-- Articles will be dynamically loaded here -->
+      </div>
+    </section>
+
+    <!-- Empty state -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <div class="empty-state-content">
+        <div class="empty-state-icon" aria-hidden="true">📰</div>
+        <h2 class="empty-state-title">No Articles Yet</h2>
+        <p class="empty-state-description">
+          Start by adding a news article to analyze.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add News Modal REMOVED -->
+
+  <!-- Card Detail Modal -->
+  <div id="cardModal" class="modal card-modal" role="dialog" aria-labelledby="cardModalTitle" aria-hidden="true">
+    <div class="modal-backdrop" aria-hidden="true"></div>
+    <div class="modal-content modal-content-large">
+      <!-- Modal content will be dynamically populated -->
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="loading-overlay" style="display: none;" aria-hidden="true">
+    <div class="loading-spinner-large"></div>
+    <p class="loading-text">Loading articles...</p>
+  </div>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal" role="dialog" aria-labelledby="loginModalTitle" aria-hidden="true">
+    <div class="modal-backdrop" aria-hidden="true"></div>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="loginModalTitle" class="modal-title">Login</h2>
+        <button class="modal-close" aria-label="Close modal" onclick="closeLoginModal()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="modal-body">
+        <form id="loginForm" onsubmit="submitLogin(event)">
+          <div class="form-group">
+            <label for="loginUsername" class="form-label">Username</label>
+            <input type="text" id="loginUsername" class="form-textarea" placeholder="Enter your username" required>
+          </div>
+
+          <div class="form-group">
+            <label for="loginPassword" class="form-label">Password</label>
+            <input type="password" id="loginPassword" class="form-textarea" placeholder="Enter your password" required>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeLoginModal()">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" id="loginSubmitBtn">
+              <span class="btn-text">Login</span>
+              <span class="btn-spinner" style="display: none;" aria-hidden="true"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signup Modal -->
+  <div id="signupModal" class="modal" role="dialog" aria-labelledby="signupModalTitle" aria-hidden="true">
+    <div class="modal-backdrop" aria-hidden="true"></div>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="signupModalTitle" class="modal-title">Sign Up</h2>
+        <button class="modal-close" aria-label="Close modal" onclick="closeSignupModal()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="modal-body">
+        <form id="signupForm" onsubmit="submitSignup(event)">
+          <div class="form-group">
+            <label for="signupUsername" class="form-label">Username</label>
+            <input type="text" id="signupUsername" class="form-textarea" placeholder="Choose a username" required>
+          </div>
+
+          <div class="form-group">
+            <label for="signupEmail" class="form-label">Email</label>
+            <input type="email" id="signupEmail" class="form-textarea" placeholder="Enter your email" required>
+          </div>
+
+          <div class="form-group">
+            <label for="signupPassword" class="form-label">Password</label>
+            <input type="password" id="signupPassword" class="form-textarea" placeholder="Choose a password" required>
+          </div>
+
+          <div class="form-group">
+            <label for="signupConfirmPassword" class="form-label">Confirm Password</label>
+            <input type="password" id="signupConfirmPassword" class="form-textarea" placeholder="Confirm your password"
+              required>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeSignupModal()">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" id="signupSubmitBtn">
+              <span class="btn-text">Sign Up</span>
+              <span class="btn-spinner" style="display: none;" aria-hidden="true"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notifications container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Scripts -->
+  <script src="/static/js/utils/imageOptimization.js"></script>
+  <script src="/static/js/utils/lazyLoading.js"></script>
+  <script src="/static/js/components/NewsCard.js"></script>
+  <script src="/static/js/components/ArticleList.js"></script>
+  <script src="/static/script.js?v=2"></script>
+</body>
+
+</html>
