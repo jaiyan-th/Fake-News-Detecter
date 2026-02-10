@@ -35,10 +35,14 @@ rate_limit_storage = defaultdict(list)
 rate_limit_lock = threading.Lock()
 
 # Load model and vectorizer
-with open(os.path.join("model", "model.pkl"), "rb") as f:
+base_dir = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(base_dir, "model", "model.pkl")
+vectorizer_path = os.path.join(base_dir, "model", "vectorizer.pkl")
+
+with open(model_path, "rb") as f:
     model = pickle.load(f)
 
-with open(os.path.join("model", "vectorizer.pkl"), "rb") as f:
+with open(vectorizer_path, "rb") as f:
     vectorizer = pickle.load(f)
 
 app = Flask(__name__)
