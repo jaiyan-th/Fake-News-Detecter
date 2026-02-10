@@ -13,7 +13,11 @@ from contextlib import contextmanager
 from typing import Dict, List, Optional, Any
 
 # Database file path
-DB_PATH = os.path.join(os.path.dirname(__file__), 'fake_news.db')
+# Database file path
+if os.environ.get('VERCEL'):
+    DB_PATH = os.path.join('/tmp', 'fake_news.db')
+else:
+    DB_PATH = os.path.join(os.path.dirname(__file__), 'fake_news.db')
 
 class DatabaseManager:
     """SQLite database manager for the fake news detector"""
