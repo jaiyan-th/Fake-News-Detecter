@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}Past Predictions - Fake News Detector{% endblock %}
+
+{% block content %}
+
+<!-- Stats bar -->
+<section class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number" id="dashTotalCount">{{ total_predictions }}</div>
+      <div class="stat-label">Total Analyses</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="dashRealCount">{{ real_count }}</div>
+      <div class="stat-label">Real News</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="dashFakeCount">{{ fake_count }}</div>
+      <div class="stat-label">Fake News</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">
+        {% if total_predictions > 0 %}
+          {{ ((fake_count / total_predictions) * 100) | round(1) }}%
+        {% else %}
+          0%
+        {% endif %}
+      </div>
+      <div class="stat-label">Fake Rate</div>
+    </div>
+  </div>
+</section>
+
+<!-- Filter and Sort Controls -->
+<section class="controls-section">
+  <div class="controls-container">
+    <div class="control-group">
+      <label for="searchInput">🔍 Search Articles</label>
+      <input type="text" id="searchInput" placeholder="Search by title or content..." onkeyup="searchPredictions()">
+    </div>
+    <div class="control-group">
+      <label for="predictionFilter">Filter by Result</label>
+      <select id="predictionFilter" onchange="filterPredictions()">
+        <option value="">All Predictions</option>
+        <option value="REAL">✅ Real News</option>
+        <option value="FAKE">⚠️ Fake News</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label for="sortSelect">Sort by</label>
+      <select id="sortSelect" onchange="sortPredictions()">
+        <option value="timestamp">Latest First</option>
+        <option value="confidence">Highest Confidence</option>
+        <option value="prediction">Prediction Type</option>
+      </select>
+    </div>
+  </div>
+</section>
+
+<!-- Article List -->
+<div class="article-list">
+  <div id="articleList"></div>
+
+  <!-- Empty State -->
+  <div id="emptyState" class="empty-state" style="display: none;">
+    <div class="empty-state-icon">📭</div>
+    <h2>No Predictions Yet</h2>
+    <p>Start analyzing news articles to see your history here.</p>
+    <a href="/" class="btn-primary" style="display: inline-block; width: auto; padding: 12px 28px;">
+      Analyze Your First Article
+    </a>
+  </div>
+
+  <!-- Loading -->
+  <div id="loadingState" class="loading show">
+    <div class="spinner"></div>
+    <p>Loading predictions...</p>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  let allPredictions = [];
+  let filteredPredictions = [];
+
+  document.addEventListener('DOMContentLoaded', function() {
+    loadPredictions();
+  });
+
+  async function loadPredictions() {
+    const loadingState = document.getElementById('loadingState');
+    const articleList = document.getElementById('articleList');
+    const emptyState = document.getElementById('emptyState');
+
+    loadingState.style.display = 'block';
+    articleList.innerHTML = '';
+    emptyState.style.display = 'none';
+
+    try {
+      const response = await fetch('/api/cards?limit=100');
+      const data = await response.json();
+
+      if (data.cards && data.cards.length > 0) {
+        allPredictions = data.cards;
+        filteredPredictions = [...allPredictions];
+        renderPredictions();
+      } else {
+        emptyState.style.display = 'block';
+      }
+    } catch (error) {
+      console.error('Error loading predictions:', error);
+      articleList.innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">Error loading predictions. Please try again.</div>';
+    } finally {
+      loadingState.style.display = 'none';
+    }
+  }
+
+  function renderPredictions() {
+    const articleList = document.getElementById('articleList');
+    const emptyState = document.getElementById('emptyState');
+
+    if (filteredPredictions.length === 0) {
+      articleList.innerHTML = '';
+      emptyState.style.display = 'block';
+      return;
+    }
+
+    emptyState.style.display = 'none';
+    articleList.innerHTML = filteredPredictions.map(pred => `
+      <div class="article-item">
+        <div class="article-header">
+          <span class="prediction-badge ${pred.prediction === 'REAL' ? 'real' : 'fake'}">
+            ${pred.prediction === 'REAL' ? '✓ Real News' : '⚠ Fake News'}
+          </span>
+          <span class="confidence-score">${Math.round(pred.confidence * 100)}% confidence</span>
+        </div>
+        <h3 class="article-title">${escapeHtml(pred.title || 'Untitled Article')}</h3>
+        <div class="article-meta">
+          <span>📅 ${formatDate(pred.timestamp)}</span>
+          <span>📰 ${escapeHtml(pred.source || 'Unknown')}</span>
+        </div>
+        <div class="article-text">
+          ${escapeHtml((pred.content || '').substring(0, 220))}${(pred.content || '').length > 220 ? '...' : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function filterPredictions() {
+    const filterValue = document.getElementById('predictionFilter').value;
+    filteredPredictions = filterValue === '' ? [...allPredictions]
+      : allPredictions.filter(pred => pred.prediction === filterValue);
+    renderPredictions();
+    updateStats();
+  }
+
+  function sortPredictions() {
+    const sortValue = document.getElementById('sortSelect').value;
+    filteredPredictions.sort((a, b) => {
+      if (sortValue === 'timestamp')  return new Date(b.timestamp) - new Date(a.timestamp);
+      if (sortValue === 'confidence') return b.confidence - a.confidence;
+      if (sortValue === 'prediction') return a.prediction.localeCompare(b.prediction);
+      return 0;
+    });
+    renderPredictions();
+  }
+
+  function searchPredictions() {
+    const term = document.getElementById('searchInput').value.toLowerCase();
+    filteredPredictions = term === '' ? [...allPredictions]
+      : allPredictions.filter(pred =>
+          (pred.title   && pred.title.toLowerCase().includes(term)) ||
+          (pred.content && pred.content.toLowerCase().includes(term))
+        );
+    renderPredictions();
+    updateStats();
+  }
+
+  function updateStats() {
+    const realCount = filteredPredictions.filter(p => p.prediction === 'REAL').length;
+    const fakeCount = filteredPredictions.filter(p => p.prediction === 'FAKE').length;
+    document.getElementById('dashTotalCount').textContent = filteredPredictions.length;
+    document.getElementById('dashRealCount').textContent  = realCount;
+    document.getElementById('dashFakeCount').textContent  = fakeCount;
+  }
+
+  function formatDate(timestamp) {
+    const date = new Date(timestamp);
+    const diffMs = Date.now() - date.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60)    return 'Just now';
+    if (diffSec < 3600)  return `${Math.floor(diffSec / 60)} min ago`;
+    if (diffSec < 86400) return `${Math.floor(diffSec / 3600)} hours ago`;
+    if (diffSec < 604800) return `${Math.floor(diffSec / 86400)} days ago`;
+    return date.toLocaleDateString();
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text || '';
+    return div.innerHTML;
+  }
+</script>
+{% endblock %}

@@ -703,7 +703,7 @@ def predict():
     news = request.form.get("news", "").strip()
     
     if not news:
-        return render_template("index.html", error="Please enter some news text to analyze")
+        return render_template("index.html", error="Please enter some news text to analyze", username=session.get('username'))
     
     try:
         cleaned = clean_text(news)
@@ -734,10 +734,10 @@ def predict():
         
         db.create_prediction(prediction_data)
 
-        return render_template("index.html", prediction=result, news=news, confidence=confidence)
+        return render_template("index.html", prediction=result, news=news, confidence=confidence, username=session.get('username'))
     except Exception as e:
         logger.error(f"Prediction failed: {e}")
-        return render_template("index.html", error=f"Analysis failed: {str(e)}")
+        return render_template("index.html", error=f"Analysis failed: {str(e)}", username=session.get('username'))
 
 # History route
 @app.route("/history")
@@ -802,7 +802,7 @@ def profile():
     yesterday = now - datetime.timedelta(days=1)
     user_stats["recent_activity"] = sum(1 for p in user_predictions if datetime.datetime.fromisoformat(str(p["timestamp"])) > yesterday)
     
-    return render_template("profile.html", user=user, stats=user_stats)
+    return render_template("profile.html", user=user, stats=user_stats, username=session.get('username'))
 
 @app.route("/update_password", methods=["POST"])
 @login_required
@@ -832,6 +832,28 @@ def update_password():
         flash("Failed to update password", "error")
         
     return redirect(url_for("profile"))
+
+# Contact route
+@app.route("/contact")
+def contact():
+    return render_template("contact.html", username=session.get('username'))
+
+# Past Predictions page route
+@app.route("/past-predictions")
+@login_required
+def past_predictions():
+    username = session.get('username')
+    user_predictions = db.get_predictions(username=username, limit=1000)
+    total = len(user_predictions)
+    real_count = sum(1 for p in user_predictions if p['prediction'] == 'REAL')
+    fake_count = sum(1 for p in user_predictions if p['prediction'] == 'FAKE')
+    return render_template(
+        "past_predictions.html",
+        username=username,
+        total_predictions=total,
+        real_count=real_count,
+        fake_count=fake_count
+    )
 
 # ============================================================================
 # NEW API ENDPOINTS FOR CARD GRID

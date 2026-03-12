@@ -67,16 +67,16 @@ function initializeArticleList() {
 function setupEventListeners() {
   // Navigation buttons
   // document.getElementById('addNewsBtn').addEventListener('click', showAddNewsModal);
-  document.getElementById('loginBtn').addEventListener('click', showLoginModal);
-  document.getElementById('signupBtn').addEventListener('click', showSignupModal);
-  document.getElementById('userBtn').addEventListener('click', showUserMenu);
+  document.getElementById('loginBtn')?.addEventListener('click', showLoginModal);
+  document.getElementById('signupBtn')?.addEventListener('click', showSignupModal);
+  document.getElementById('userBtn')?.addEventListener('click', showUserMenu);
   // Layout button removed - using fixed list layout
 
   // Search functionality removed from setupEventListeners (replaced by Analysis Form)
 
   // Filter and sort controls
-  document.getElementById('predictionFilter').addEventListener('change', handleFilterChange);
-  document.getElementById('sortSelect').addEventListener('change', handleSortChange);
+  document.getElementById('predictionFilter')?.addEventListener('change', handleFilterChange);
+  document.getElementById('sortSelect')?.addEventListener('change', handleSortChange);
 
   // Modal event listeners
   setupModalEventListeners();
@@ -809,3 +809,109 @@ async function submitLogin(event) {
     setLoginLoadingState(false);
   }
 }
+
+async function submitSignup(event) {
+  event.preventDefault();
+
+  const username = document.getElementById('signupUsername').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value.trim();
+  const confirmPassword = document.getElementById('signupConfirmPassword').value.trim();
+
+  if (password !== confirmPassword) {
+    showToast('Passwords do not match', 'error');
+    return;
+  }
+
+  try {
+    setSignupLoadingState(true);
+
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('email', email);
+    formData.append('password', password);
+    formData.append('confirm_password', confirmPassword);
+
+    const response = await fetch(API_ENDPOINTS.register, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (response.redirected) {
+      // If success, usually redirects to login with success msg
+      window.location.href = response.url;
+      return;
+    }
+
+    const html = await response.text();
+    if (html.includes('Username already exists')) {
+      showToast('Username already exists', 'error');
+    } else {
+      showToast('Registration failed', 'error');
+    }
+
+  } catch (error) {
+    console.error('Registration failed:', error);
+    showToast('Registration failed', 'error');
+  } finally {
+    setSignupLoadingState(false);
+  }
+}
+
+async function checkAuthenticationStatus() {
+  try {
+    // Check if we can access a protected route or have a session
+    // Since we don't have a direct /api/me endpoint in the example, 
+    // we'll check layout state or assume based on page content if we were doing server-side rendering
+    // For this standalone JS, we might need an endpoint.
+
+    // Let's assume we can check via a specific API call or just look for a cookie (not secure JS side)
+    // Better: Try to hit an endpoint that returns user info
+    // For now, we'll assume not authenticated unless we implemented the check.
+
+    // Since we are hybrid, let's check a data attribute or global variable injected by server
+    // returning false for now
+    return false;
+
+  } catch (error) {
+    return false;
+  }
+}
+
+function showUserMenu() {
+  window.location.href = '/profile';
+}
+
+// Loading states for auth
+function setLoginLoadingState(isLoading) {
+  const btn = document.getElementById('loginSubmitBtn');
+  const btnText = btn.querySelector('.btn-text');
+  const btnSpinner = btn.querySelector('.btn-spinner');
+
+  if (isLoading) {
+    btn.disabled = true;
+    btnText.style.display = 'none';
+    btnSpinner.style.display = 'inline-block';
+  } else {
+    btn.disabled = false;
+    btnText.style.display = 'inline';
+    btnSpinner.style.display = 'none';
+  }
+}
+
+function setSignupLoadingState(isLoading) {
+  const btn = document.getElementById('signupSubmitBtn');
+  const btnText = btn.querySelector('.btn-text');
+  const btnSpinner = btn.querySelector('.btn-spinner');
+
+  if (isLoading) {
+    btn.disabled = true;
+    btnText.style.display = 'none';
+    btnSpinner.style.display = 'inline-block';
+  } else {
+    btn.disabled = false;
+    btnText.style.display = 'inline';
+    btnSpinner.style.display = 'none';
+  }
+}
+

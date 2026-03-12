@@ -1,113 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - Fake News Detector</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Outfit:wght@400;500;700&display=swap"
-        rel="stylesheet">
-    <meta name="theme-color" content="#ffffff">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Fake News Detector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
+<body>
 
-<body style="min-height: 100vh; display: flex; flex-direction: column;">
-    <!-- NotebookLM Style Header -->
-    <header class="answersq-header">
-        <div class="header-container">
-            <a href="/" class="header-brand">
-                <span class="app-icon" style="font-size: 20px;">📰</span>
-                <span class="app-title" style="font-size: 22px;">Fake News Detector</span>
-            </a>
-            <nav class="header-nav">
-                <a href="/" class="nav-link">Home</a>
-            </nav>
-        </div>
-    </header>
+<div class="auth-page">
+  <div class="auth-card">
+    <!-- Logo -->
+    <div class="auth-logo">
+      <span class="logo-icon">📰</span>
+      <h1>Fake News Detector</h1>
+    </div>
 
-    <!-- Centered Auth Card -->
-    <main class="app-main" style="flex: 1; display: flex; align-items: center; justify-content: center;">
-        <div class="news-card"
-            style="width: 100%; max-width: 440px; border-radius: 24px; padding: 40px; box-shadow: 0 4px 12px rgba(60,64,67,0.08);">
-            <div style="text-align: center; margin-bottom: 32px;">
-                <h1 style="font-size: 28px; font-weight: 400; margin-bottom: 8px;">Create account</h1>
-                <p style="color: var(--text-secondary);">Join us to start detecting fake news</p>
-            </div>
+    <h2 class="auth-title">Create Account</h2>
+    <p class="auth-subtitle">Join us to start detecting fake news</p>
 
-            <form method="POST">
-                {% if error %}
-                <div class="toast error" style="margin-bottom: 20px; animation: none;">
-                    {{ error }}
-                </div>
-                {% endif %}
+    <!-- Alerts -->
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
 
-                {% if success %}
-                <div class="toast"
-                    style="margin-bottom: 20px; animation: none; background: var(--success); color: white;">
-                    {{ success }}
-                </div>
-                {% endif %}
+    <form method="POST">
+      <div class="form-group">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" id="username" name="username" class="form-input" required minlength="3"
+          placeholder="At least 3 characters">
+      </div>
+      <div class="form-group">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" id="email" name="email" class="form-input" required placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" id="password" name="password" class="form-input" required minlength="6"
+          placeholder="At least 6 characters">
+      </div>
+      <div class="form-group">
+        <label for="confirm_password" class="form-label">Confirm Password</label>
+        <input type="password" id="confirm_password" name="confirm_password" class="form-input" required
+          placeholder="Confirm new password">
+      </div>
+      <button type="submit" class="btn-primary" style="margin-top:8px;">Create Account</button>
+    </form>
 
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label for="username" class="form-label"
-                        style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Username</label>
-                    <input type="text" id="username" name="username" class="form-input"
-                        style="width: 100%; padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-surface);"
-                        required minlength="3">
-                </div>
+    <div class="auth-footer" style="margin-top:24px; padding-top:20px; border-top:1px solid #e5e5e5;">
+      Already have an account? <a href="/login">Sign In</a>
+    </div>
+  </div>
+</div>
 
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label for="email" class="form-label"
-                        style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Email</label>
-                    <input type="email" id="email" name="email" class="form-input"
-                        style="width: 100%; padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-surface);"
-                        required>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label for="password" class="form-label"
-                        style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Password</label>
-                    <input type="password" id="password" name="password" class="form-input"
-                        style="width: 100%; padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-surface);"
-                        required minlength="6">
-                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Minimum 6 characters</div>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 32px;">
-                    <label for="confirm_password" class="form-label"
-                        style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Confirm
-                        Password</label>
-                    <input type="password" id="confirm_password" name="confirm_password" class="form-input"
-                        style="width: 100%; padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-surface);"
-                        required>
-                </div>
-
-                <button type="submit" class="nav-btn primary"
-                    style="width: 100%; padding: 14px; border-radius: 100px; font-size: 16px; margin-bottom: 24px;">Create
-                    Account</button>
-            </form>
-
-            <div style="text-align: center; border-top: 1px solid var(--border-subtle); padding-top: 24px;">
-                <p style="color: var(--text-secondary);">Already have an account? <a href="/login"
-                        style="color: var(--primary); text-decoration: none; font-weight: 500;">Sign In</a></p>
-            </div>
-        </div>
-    </main>
-
-    <script>
-        document.getElementById('confirm_password').addEventListener('input', function () {
-            const password = document.getElementById('password').value;
-            const confirmPassword = this.value;
-            if (password !== confirmPassword) {
-                this.setCustomValidity('Passwords do not match');
-            } else {
-                this.setCustomValidity('');
-            }
-        });
-    </script>
+<script>
+  document.getElementById('confirm_password').addEventListener('input', function () {
+    const pw = document.getElementById('password').value;
+    this.setCustomValidity(pw !== this.value ? 'Passwords do not match' : '');
+  });
+</script>
 </body>
-
 </html>
