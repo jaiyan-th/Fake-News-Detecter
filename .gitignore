@@ -1,0 +1,89 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environment variables
+.env
+*.env
+!.env.example
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+fake-news-detector/database/*.db
+database/*.db
+
+# Logs
+*.log
+logs/
+fake-news-detector/logs/*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Kiro
+.kiro/
+
+# Cache
+.cache/
+*.cache
+
+# Testing
+.pytest_cache/
+.hypothesis/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Documentation (keep only essential)
+DATABASE_FIX_INSTRUCTIONS.md
+DATABASE_FIXED.md
+REGISTRATION_FIXED.md
+ALL_ISSUES_FIXED.md
+DATABASE_SCHEMA_FIXED.md
+REGISTRATION_NOW_WORKING.md
+TRUSTED_SOURCE_DETECTION_IMPROVED.md
+PROJECT_REORGANIZED.md
+CLEANUP_COMPLETE.md

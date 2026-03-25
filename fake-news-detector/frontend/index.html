@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Detector - Truth Verification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=1774094137">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- 
+    For Production Google Sign-in Setup:
+    1. Go to Google Cloud Console (console.cloud.google.com)
+    2. Create a new project or select existing one
+    3. Enable Google+ API
+    4. Create OAuth 2.0 credentials
+    5. Add your domain to authorized origins
+    6. Replace 'YOUR_GOOGLE_CLIENT_ID' in app.js with your actual client ID
+    7. Uncomment the initializeRealGoogleSignIn function
+    -->
+</head>
+<body>
+    <header class="main-header">
+        <div class="container nav-container">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                </div>
+                Fake News Detector
+            </div>
+            <nav class="main-nav">
+                <a href="#" class="active" id="nav-home">Home</a>
+                <a href="#" id="nav-verify">Verify</a>
+                <a href="#" id="nav-history">History</a>
+                <a href="#" id="nav-about">About</a>
+                <a href="#" id="nav-contact">Contact</a>
+                <a href="#" id="nav-profile" class="hidden">Profile</a>
+            </nav>
+            <div class="header-actions">
+                <button class="btn btn-outline" id="btn-login">Login</button>
+                <button class="btn btn-primary" id="btn-signup">Sign Up</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Landing Section (Mockup 5 Style) -->
+        <section id="home-section" class="active-section hero-section">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        Detecting the Invisible: <span class="hero-title-accent">AI-Powered</span> Truth Verification
+                    </h1>
+                    <p class="hero-description">
+                        Harnessing advanced NLP and domain intelligence to verify information in real-time. Protect yourself from misinformation with professional-grade analytical tools.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary btn-lg" id="btn-start-analysis">Start Analysis</button>
+                        <button class="btn btn-outline btn-lg">Learn More</button>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="hero-card">
+                        <!-- Background Effects -->
+                        <div class="hero-bg-effect-1"></div>
+                        <div class="hero-bg-effect-2"></div>
+                        
+                        <!-- AI Robot Illustration -->
+                        <div class="hero-robot-container">
+                            <div class="hero-robot">
+                                <!-- Robot Head -->
+                                <div class="robot-head">
+                                    <!-- Eyes -->
+                                    <div class="robot-eye robot-eye-left"></div>
+                                    <div class="robot-eye robot-eye-right"></div>
+                                    <!-- Mouth -->
+                                    <div class="robot-mouth"></div>
+                                    <!-- Antenna -->
+                                    <div class="robot-antenna"></div>
+                                    <div class="robot-antenna-tip"></div>
+                                </div>
+                                
+                                <!-- Robot Body -->
+                                <div class="robot-body">
+                                    <!-- Chest Panel -->
+                                    <div class="robot-chest"></div>
+                                    <!-- Status Lights -->
+                                    <div class="robot-light robot-light-green"></div>
+                                    <div class="robot-light robot-light-orange"></div>
+                                    <!-- Arms -->
+                                    <div class="robot-arm robot-arm-left"></div>
+                                    <div class="robot-arm robot-arm-right"></div>
+                                </div>
+                                
+                                <!-- Base/Stand -->
+                                <div class="robot-base"></div>
+                            </div>
+                            
+                            <!-- Floating Elements -->
+                            <div class="hero-float-element hero-float-circle"></div>
+                            <div class="hero-float-element hero-float-square"></div>
+                        </div>
+                        
+                        <!-- Tech Grid Background -->
+                        <div class="hero-grid-bg"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="features-header">
+                <h2 class="features-title">Powerful Detection Features</h2>
+                <p class="features-description">Fake News Detector uses cutting-edge AI to identify misinformation across various formats, ensuring you always have the full picture.</p>
+            </div>
+
+            <!-- Feature Cards Grid -->
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                            <path d="M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Multi-Model AI Ensemble</h3>
+                    <p class="feature-description">Combines three Llama 3 models (8B, 90B & 70B) for superior accuracy and reliability in detecting misinformation.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="2" y1="12" x2="22" y2="12"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Multi-Language Support</h3>
+                    <p class="feature-description">Analyze content in 10+ languages including English, Spanish, French, German, Hindi, Arabic, Chinese, and Japanese with automatic detection.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Source Credibility Check</h3>
+                    <p class="feature-description">Verifies claims against trusted news sources and databases, providing similarity scores and credibility ratings for each match.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                            <line x1="12" y1="22.08" x2="12" y2="12"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Pattern Detection</h3>
+                    <p class="feature-description">Identifies fake news patterns, emotional manipulation tactics, suspicious phrases, and clickbait indicators using advanced NLP algorithms.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Semantic Similarity Analysis</h3>
+                    <p class="feature-description">Uses state-of-the-art embedding models to compare content semantically, detecting subtle variations and contradictions in claims.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10 9 9 9 8 9"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Real-Time Analysis</h3>
+                    <p class="feature-description">Instant verification of text and URLs with comprehensive reports including confidence scores, explanations, and verified sources.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Verification Section -->
+        <section id="verification-section" class="hidden">
+            <!-- Authentication Notice -->
+            <div id="auth-notice" class="card auth-notice">
+                <div class="auth-notice-content">
+                    <div class="auth-notice-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                            <path d="M9 12l2 2 4-4"/>
+                            <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
+                            <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
+                            <path d="M13 12h3"/>
+                            <path d="M8 12H5"/>
+                        </svg>
+                    </div>
+                    <div class="auth-notice-text">
+                        <h3 class="auth-notice-title">Authentication Required</h3>
+                        <p class="auth-notice-description">Please login or create an account to access the fake news detection and verification features.</p>
+                    </div>
+                    <button class="btn btn-primary btn-warning" id="auth-notice-login">Login Now</button>
+                </div>
+            </div>
+
+            <div class="page-header">
+                <div>
+                    <h1>New Analysis</h1>
+                    <p>Submit claims or links to verify their authenticity against our global database.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="tabs">
+                    <button class="tab-btn active" data-target="text-input">Text Analysis (NLP)</button>
+                    <button class="tab-btn" data-target="url-input">URL Verification</button>
+                </div>
+
+                <div class="tab-content">
+                    <div id="text-input" class="input-view active">
+                        <div class="input-group">
+                            <label class="form-label">Text to Analyze</label>
+                            <textarea id="claim-text" placeholder="Paste the claim or news excerpt here to detect semantic bias and factual inconsistencies..."></textarea>
+                        </div>
+                        <button class="btn btn-primary w-full" id="btn-verify-text">Verify Text</button>
+                    </div>
+
+                    <div id="url-input" class="input-view">
+                        <div class="input-group">
+                            <label class="form-label">Article URL</label>
+                            <input type="url" id="news-url" placeholder="https://news-source.com/article-to-verify">
+                        </div>
+                        <button class="btn btn-primary w-full" id="btn-verify-url">Verify URL</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loading-indicator" class="hidden card">
+                <div class="spinner"></div>
+                <div class="loading-text text-center mb-6">Analyzing through Neural Verification Engine...</div>
+                <div class="pipeline-progress">
+                    <div class="step active">Input Processing</div>
+                    <div class="step">Fact Retrieval</div>
+                    <div class="step">Semantics</div>
+                    <div class="step">Credibility</div>
+                </div>
+            </div>
+
+            <!-- Verification Results -->
+            <div id="results-panel" class="hidden">
+                <div class="page-header results-header">
+                    <div>
+                        <h1>Verification Report</h1>
+                        <p>Detailed breakdown of our AI analysis.</p>
+                    </div>
+                    <span class="badge badge-neutral" id="domain-badge">Sports Domain</span>
+                </div>
+                
+                <div class="card verdict-banner" id="verdict-banner">
+                    <div>
+                        <h2 class="verdict-title" id="prediction-text">REAL</h2>
+                        <span class="verdict-label">Final Verdict</span>
+                    </div>
+                    <div class="text-right">
+                        <div class="confidence-display" id="confidence-score">98%</div>
+                        <span class="verdict-label">Confidence Score</span>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <h4>AI Explanation</h4>
+                    <div class="explanation-text" id="explanation-text">...</div>
+                    <ul id="warnings-list" class="warnings-list"></ul>
+                </div>
+
+                <div class="result-section hidden" id="llm-section">
+                    <h4>LLM Verification Insight</h4>
+                    <div class="llm-panel">
+                        <div class="llm-header-row">
+                            <div>
+                                <span class="llm-kicker">Context-Aware URL Reasoning</span>
+                                <h5 id="llm-verdict-text">UNVERIFIED</h5>
+                            </div>
+                            <span class="badge" id="llm-status-badge">LLM</span>
+                        </div>
+                        <p class="llm-summary" id="llm-summary-text"></p>
+                        <ul class="llm-reasoning-list" id="llm-reasoning-list"></ul>
+                        <p class="llm-warning hidden" id="llm-warning-text"></p>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <h4>Verified Sources</h4>
+                    <div id="sources-list" class="sources-grid">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- History Section (Mockup 4 Style) -->
+        <section id="history-section" class="hidden">
+            <div class="page-header">
+                <div>
+                    <h1>Analysis History</h1>
+                    <p>Review and manage your previous truth verification results.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-outline btn-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Export Data
+                    </button>
+                    <button class="btn btn-primary" id="btn-new-analysis-history">+ New Analysis</button>
+                </div>
+            </div>
+
+            <div class="card card-no-padding">
+                <div class="history-filters">
+                    <div class="search-wrapper">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" placeholder="Search by input content or result..." class="search-input">
+                    </div>
+                    <div class="filter-group">
+                        <select class="filter-select">
+                            <option>Domain: All</option>
+                        </select>
+                        <select class="filter-select">
+                            <option>Type: All</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Input Preview</th>
+                                <th>Result</th>
+                                <th>Confidence</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-list-body">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <h5>Recent Activity</h5>
+                    <p>Your account has processed <strong id="stat-count">0</strong> verifications. Track your credibility assessment trends.</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <h5>Privacy Status</h5>
+                    <p>All history items are securely stored locally. You can clear your history or individual entries at any time.</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    </div>
+                    <h5>AI Accuracy</h5>
+                    <p>Our models are currently performing at <strong>96.4%</strong> confidence across the history shown here. Model: VeriFact v2.4.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about-section" class="hidden">
+            <div class="page-header">
+                <div>
+                    <h1>About Fake News Detector</h1>
+                    <p>Advanced AI-powered truth verification technology for the digital age.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="about-hero">
+                    <div class="about-text">
+                        <h2 class="about-title">Fighting Misinformation with AI</h2>
+                        <p class="about-paragraph">
+                            Fake News Detector represents the cutting edge of truth verification technology. Our advanced system combines natural language processing, semantic analysis, and machine learning to detect misinformation across multiple languages and formats.
+                        </p>
+                        <p class="about-paragraph">
+                            Built with a commitment to accuracy, transparency, and user privacy, Fake News Detector empowers individuals and organizations to make informed decisions in an era of information overload.
+                        </p>
+                    </div>
+                    <div class="about-visual">
+                        <div class="about-shield">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                <polyline points="9 12 11 14 15 10"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-auto mb-10">
+                <div class="card">
+                    <div class="stat-icon feature-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="2" y1="12" x2="22" y2="12"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-card-title">Multi-Language Support</h3>
+                    <p class="feature-card-text">
+                        Analyze content in 10+ languages including English, Spanish, French, German, Hindi, Arabic, Chinese, and Japanese with automatic language detection.
+                    </p>
+                </div>
+
+                <div class="card">
+                    <div class="stat-icon feature-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4"/>
+                            <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
+                            <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
+                            <path d="M13 12h3"/>
+                            <path d="M8 12H5"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-card-title">Pattern Detection</h3>
+                    <p class="feature-card-text">
+                        Advanced algorithms identify fake news patterns, emotional manipulation, suspicious phrases, and credibility indicators in real-time.
+                    </p>
+                </div>
+
+                <div class="card">
+                    <div class="stat-icon feature-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="6" y="6" width="12" height="12" rx="2" ry="2"/>
+                            <circle cx="9" cy="10" r="1"/>
+                            <circle cx="15" cy="10" r="1"/>
+                            <path d="M9 14h6"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-card-title">AI-Powered Analysis</h3>
+                    <p class="feature-card-text">
+                        Leveraging state-of-the-art LLMs and semantic similarity models to provide comprehensive, explainable analysis results.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mission-card">
+                <h3 class="mission-title">Our Mission</h3>
+                <p class="mission-text">
+                    To democratize access to reliable information verification tools, empowering everyone to distinguish between authentic news and misinformation in our interconnected world.
+                </p>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact-section" class="hidden">
+            <div class="page-header">
+                <div>
+                    <h1>Contact Us</h1>
+                    <p>Get in touch with our team for support, partnerships, or inquiries.</p>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3 class="contact-form-title">Send us a Message</h3>
+                    <form id="contact-form" class="contact-form">
+                        <div>
+                            <label class="form-label">Name</label>
+                            <input type="text" id="contact-name" required class="form-input">
+                        </div>
+                        <div>
+                            <label class="form-label">Email</label>
+                            <input type="email" id="contact-email" required class="form-input">
+                        </div>
+                        <div>
+                            <label class="form-label">Subject</label>
+                            <select id="contact-subject" class="form-input">
+                                <option>General Inquiry</option>
+                                <option>Technical Support</option>
+                                <option>Partnership Opportunity</option>
+                                <option>API Access Request</option>
+                                <option>Bug Report</option>
+                                <option>Feature Request</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Message</label>
+                            <textarea id="contact-message" required rows="5" class="form-textarea"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary form-submit">Send Message</button>
+                    </form>
+                </div>
+
+                <div>
+                    <div class="card mb-6">
+                        <h3 class="contact-info-title">Get in Touch</h3>
+                        <div class="contact-info-list">
+                            <div class="contact-info-item">
+                                <div class="contact-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-orange)" stroke-width="2">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                        <polyline points="22,6 12,13 2,6"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="contact-info-label">Email</div>
+                                    <div class="contact-info-value">jaiyanth.b@outlook.com</div>
+                                </div>
+                            </div>
+                            <div class="contact-info-item">
+                                <div class="contact-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-orange)" stroke-width="2">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="contact-info-label">Phone</div>
+                                    <div class="contact-info-value">+91 9345573281</div>
+                                </div>
+                            </div>
+                            <div class="contact-info-item">
+                                <div class="contact-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-orange)" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                        <circle cx="12" cy="10" r="3"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="contact-info-label">Location</div>
+                                    <div class="contact-info-value">Karur, TamilNadu, India</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profile-section" class="hidden">
+            <div class="page-header">
+                <div>
+                    <h1>My Profile</h1>
+                    <p>Manage your account settings and preferences.</p>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </div>
+                        <div class="profile-info">
+                            <h2 class="profile-name" id="profile-name">User Name</h2>
+                            <p class="profile-email" id="profile-email">user@example.com</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-stats">
+                        <div class="profile-stat-item">
+                            <div class="profile-stat-value" id="profile-total-analyses">0</div>
+                            <div class="profile-stat-label">Total Analyses</div>
+                        </div>
+                        <div class="profile-stat-item">
+                            <div class="profile-stat-value" id="profile-member-since">Jan 2026</div>
+                            <div class="profile-stat-label">Member Since</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="profile-section-title">Account Information</h3>
+                    <div class="profile-detail-list">
+                        <div class="profile-detail-item">
+                            <span class="profile-detail-label">Full Name</span>
+                            <span class="profile-detail-value" id="profile-fullname">-</span>
+                        </div>
+                        <div class="profile-detail-item">
+                            <span class="profile-detail-label">Email Address</span>
+                            <span class="profile-detail-value" id="profile-email-detail">-</span>
+                        </div>
+                        <div class="profile-detail-item">
+                            <span class="profile-detail-label">Account Type</span>
+                            <span class="badge badge-neutral">Standard User</span>
+                        </div>
+                        <div class="profile-detail-item">
+                            <span class="profile-detail-label">Authentication Method</span>
+                            <span class="profile-detail-value" id="profile-auth-method">Email/Password</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="profile-section-title">Account Actions</h3>
+                <div class="profile-actions">
+                    <button class="btn btn-outline" id="btn-change-password">Change Password</button>
+                    <button class="btn btn-outline" id="btn-export-data">Export My Data</button>
+                    <button class="btn btn-outline" style="color: var(--fake-color); border-color: var(--fake-color);" id="btn-delete-account">Delete Account</button>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <div class="footer-logo">
+                <div class="logo-icon footer-logo-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:white;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                Fake News Detector
+            </div>
+            <div>© 2026 Developed by Jaiyanth B. All rights reserved. An Fullstack Developer</div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Login to Your Account</h2>
+                <button class="modal-close" id="close-login">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="login-form" autocomplete="off">
+                    <div class="input-group">
+                        <label>Email</label>
+                        <input type="email" id="login-email" required autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="login-password" required autocomplete="new-password">
+                            <button type="button" class="password-toggle" data-target="login-password">
+                                <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <svg class="eye-off-icon hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                    <line x1="1" y1="1" x2="23" y2="23"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full mb-4">Login</button>
+                </form>
+                
+                <div class="divider">
+                    <span>or</span>
+                </div>
+                
+                <div id="google-signin-login" class="google-signin-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Sign in with Google
+                </div>
+                
+                <p class="modal-footer-text">
+                    Don't have an account? <a href="#" id="switch-to-signup">Sign up here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signup-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create Your Account</h2>
+                <button class="modal-close" id="close-signup">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="signup-form" autocomplete="off">
+                    <div class="input-group">
+                        <label>Full Name</label>
+                        <input type="text" id="signup-name" required autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <label>Email</label>
+                        <input type="email" id="signup-email" required autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="signup-password" required autocomplete="new-password">
+                            <button type="button" class="password-toggle" data-target="signup-password">
+                                <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <svg class="eye-off-icon hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                    <line x1="1" y1="1" x2="23" y2="23"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Confirm Password</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="signup-confirm-password" required autocomplete="new-password">
+                            <button type="button" class="password-toggle" data-target="signup-confirm-password">
+                                <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <svg class="eye-off-icon hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                    <line x1="1" y1="1" x2="23" y2="23"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full mb-4">Sign Up</button>
+                </form>
+                
+                <div class="divider">
+                    <span>or</span>
+                </div>
+                
+                <div id="google-signin-signup" class="google-signin-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Sign up with Google
+                </div>
+                
+                <p class="modal-footer-text">
+                    Already have an account? <a href="#" id="switch-to-login">Login here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="change-password-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+                <button class="modal-close" id="close-change-password">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="change-password-form" autocomplete="off">
+                    <div class="input-group">
+                        <label>Current Password</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="current-password" required autocomplete="new-password">
+                            <button type="button" class="password-toggle" data-target="current-password">
+                                <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <svg class="eye-off-icon hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                    <line x1="1" y1="1" x2="23" y2="23"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>New Password</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="new-password" required minlength="6" autocomplete="new-password">
+                            <button type="button" class="password-toggle" data-target="new-password">
+                                <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <svg class="eye-off-icon hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                    <line x1="1" y1="1" x2="23" y2="23"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Confirm New Password</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="confirm-new-password" required minlength="6" autocomplete="new-password">
+                            <button type="button" class="password-toggle" data-target="confirm-new-password">
+                                <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <svg class="eye-off-icon hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                    <line x1="1" y1="1" x2="23" y2="23"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                        <input type="password" id="confirm-new-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full">Update Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js?v=1774094137"></script>
+    <script src="js/uploader.js?v=1774094137"></script>
+    <script src="js/dashboard.js?v=1774094137"></script>
+    <script src="js/app.js?v=1774094137"></script>
+</body>
+</html>
