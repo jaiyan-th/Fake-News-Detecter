@@ -21,6 +21,16 @@ def load_user(user_id):
     """Load user by ID for Flask-Login"""
     return User.query.get(int(user_id))
 
+@login_manager.unauthorized_handler
+def unauthorized():
+    """Handle unauthorized access - return JSON instead of redirect"""
+    from flask import jsonify
+    return jsonify({
+        'success': False,
+        'error': 'Authentication required',
+        'message': 'Please log in to access this resource'
+    }), 401
+
 def create_app():
     """Create and configure Flask application"""
     from config import Config as AppConfig
@@ -54,7 +64,8 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.session_protection = "strong"
-    login_manager.login_view = "auth.login"
+    # Don't set login_view - we'll handle unauthorized access with JSON responses
+    login_manager.login_view = None
     
     # Create database tables (with error handling)
     with app.app_context():
