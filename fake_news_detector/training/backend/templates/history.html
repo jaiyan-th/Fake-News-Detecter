@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis History - Fake News Detector{% endblock %}
+
+{% block content %}
+
+<!-- Stats bar -->
+<section class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number">{{ predictions | length }}</div>
+      <div class="stat-label">Total Analyses</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ predictions | selectattr("prediction", "equalto", "REAL") | list | length }}</div>
+      <div class="stat-label">Real News</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ predictions | selectattr("prediction", "equalto", "FAKE") | list | length }}</div>
+      <div class="stat-label">Fake News</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">
+        {% set total = predictions | length %}
+        {% set fake = predictions | selectattr("prediction", "equalto", "FAKE") | list | length %}
+        {% if total > 0 %}{{ ((fake / total) * 100) | round(1) }}%{% else %}0%{% endif %}
+      </div>
+      <div class="stat-label">Fake Rate</div>
+    </div>
+  </div>
+</section>
+
+<!-- Controls -->
+<section class="controls-section">
+  <div class="controls-container">
+    <div class="control-group">
+      <label for="searchInput">🔍 Search Articles</label>
+      <input type="text" id="searchInput" placeholder="Search by content..." onkeyup="filterItems()">
+    </div>
+    <div class="control-group">
+      <label for="filterSelect">Filter by Result</label>
+      <select id="filterSelect" onchange="filterItems()">
+        <option value="">All Predictions</option>
+        <option value="REAL">✅ Real News</option>
+        <option value="FAKE">⚠️ Fake News</option>
+      </select>
+    </div>
+  </div>
+</section>
+
+<!-- Article List -->
+<div class="article-list">
+
+  {% if predictions %}
+  <div id="historyList">
+    {% for prediction in predictions %}
+    <div class="article-item history-row"
+         data-prediction="{{ prediction.prediction }}"
+         data-text="{{ prediction.news | lower }}">
+
+      <div class="article-header">
+        <span class="prediction-badge {{ 'real' if prediction.prediction == 'REAL' else 'fake' }}">
+          {{ '✓ Real News' if prediction.prediction == 'REAL' else '⚠ Fake News' }}
+        </span>
+        <span class="confidence-score">
+          {{ "%.0f"|format(prediction.confidence * 100) }}% confidence
+        </span>
+      </div>
+
+      <div class="article-meta">
+        <span>📅 {{ prediction.timestamp }}</span>
+        <span>📝 {{ prediction.news | length }} characters</span>
+      </div>
+
+      <div class="article-text">
+        {{ prediction.news[:250] }}{% if prediction.news | length > 250 %}...{% endif %}
+      </div>
+
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Clear History -->
+  <div style="text-align:center; padding: 28px 24px; border-top: 1px solid var(--border); margin-top: 8px;">
+    <form method="POST" action="/clear_history"
+          onsubmit="return confirm('Clear all analysis history? This cannot be undone.')">
+      <button type="submit" style="
+        background: none;
+        border: 1.5px solid #dc2626;
+        color: #dc2626;
+        padding: 9px 20px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .2s;
+      " onmouseover="this.style.background='#dc2626';this.style.color='#fff'"
+         onmouseout="this.style.background='none';this.style.color='#dc2626'">
+        🗑️ Clear All History
+      </button>
+    </form>
+  </div>
+
+  {% else %}
+  <!-- Empty State -->
+  <div class="empty-state">
+    <div class="empty-state-icon">📭</div>
+    <h2>No Analysis History</h2>
+    <p>You haven't analyzed any articles yet. Start detecting fake news!</p>
+    <a href="/" class="btn-primary" style="display:inline-block;width:auto;padding:12px 28px;margin-top:8px;">
+      Start Analyzing
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function filterItems() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const filter = document.getElementById('filterSelect').value;
+    const rows = document.querySelectorAll('.history-row');
+
+    rows.forEach(row => {
+      const text = row.dataset.text || '';
+      const pred = row.dataset.prediction || '';
+      const matchesSearch = !search || text.includes(search);
+      const matchesFilter = !filter || pred === filter;
+      row.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+    });
+  }
+</script>
+{% endblock %}

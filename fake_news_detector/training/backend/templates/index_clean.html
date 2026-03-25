@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fake News Detector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #ffffff;
+      color: #000000;
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .answersq-header {
+      background: #000000;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 60px;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+    }
+
+    .app-title {
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .app-icon {
+      margin-right: 8px;
+      font-size: 20px;
+    }
+
+    .header-nav {
+      display: flex;
+      gap: 0;
+      align-items: center;
+    }
+
+    .nav-link {
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 400;
+      padding: 8px 16px;
+      font-size: 14px;
+      transition: all 0.2s;
+      border-right: 1px solid #333;
+    }
+
+    .nav-link:hover {
+      background: #333333;
+    }
+
+    .nav-link.active {
+      background: #333333;
+      font-weight: 500;
+    }
+
+    .btn-logout {
+      background: #ffffff;
+      color: #000000;
+      text-decoration: none;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+      border: 1px solid #000000;
+    }
+
+    .btn-logout:hover {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    /* Welcome Section */
+    .welcome-section {
+      background: #000000;
+      color: #ffffff;
+      padding: 60px 20px;
+      text-align: center;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .welcome-section h1 {
+      font-size: 32px;
+      font-weight: 300;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .welcome-section p {
+      font-size: 16px;
+      font-weight: 300;
+      opacity: 0.8;
+    }
+
+    /* Dashboard Features Section */
+    .features-section {
+      background: #000000;
+      color: #ffffff;
+      padding: 40px 20px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .features-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .features-title {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 300;
+      margin-bottom: 30px;
+      letter-spacing: -0.5px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+    }
+
+    .feature-item {
+      text-align: center;
+      padding: 20px;
+      border: 1px solid #333333;
+    }
+
+    .feature-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .feature-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .feature-description {
+      font-size: 14px;
+      opacity: 0.8;
+      line-height: 1.4;
+    }
+
+    /* Form Section */
+    .hero-section {
+      background: #ffffff;
+      padding: 40px 20px;
+    }
+
+    .analysis-form-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
+      padding: 30px;
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: transparent;
+      color: #666666;
+      font-weight: 400;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab-btn.active {
+      color: #000000;
+      border-bottom-color: #000000;
+      font-weight: 500;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      color: #000000;
+    }
+
+    .form-textarea, .form-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #e5e5e5;
+      font-size: 14px;
+      font-family: inherit;
+      background: #ffffff;
+      color: #000000;
+      transition: all 0.2s;
+      resize: vertical;
+    }
+
+    .form-textarea:focus, .form-input:focus {
+      outline: none;
+      border-color: #000000;
+    }
+
+    .form-textarea {
+      min-height: 120px;
+    }
+
+    .analyze-btn {
+      background: #000000;
+      color: #ffffff;
+      border: none;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .analyze-btn:hover {
+      background: #333333;
+    }
+
+    .analyze-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Results */
+    .result-section {
+      max-width: 500px;
+      margin: 20px auto 0;
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
+      padding: 20px;
+      display: none;
+    }
+
+    .result-section.show {
+      display: block;
+    }
+
+    .result-header {
+      text-align: center;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #e5e5e5;
+    }
+
+    .result-header.fake {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .result-header.real {
+      background: #ffffff;
+      color: #000000;
+      border-color: #000000;
+    }
+
+    .result-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .result-status {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .result-confidence {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      display: none;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .spinner {
+      border: 2px solid #e5e5e5;
+      border-top: 2px solid #000000;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="answersq-header">
+    <div class="header-container">
+      <div class="header-brand">
+        <h1 class="app-title">
+          <span class="app-icon">📰</span>
+          Fake News Detector
+        </h1>
+      </div>
+      <nav class="header-nav">
+        <a href="/" class="nav-link active">Home</a>
+        <a href="/past-predictions" class="nav-link">Past Predictions</a>
+        {% if username %}
+        <a href="/profile" class="nav-link">Profile</a>
+        {% endif %}
+        <a href="/contact" class="nav-link">Contact</a>
+        {% if username %}
+        <a href="/logout" class="btn-logout">Logout</a>
+        {% else %}
+        <a href="/login" class="nav-link">Login</a>
+        <a href="/register" class="nav-link">Register</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <!-- Welcome Section -->
+  <section class="welcome-section">
+    <div style="max-width: 800px; margin: 0 auto;">
+      <h1>Welcome to Fake News Detector</h1>
+      <p>Analyze news articles using advanced AI to detect fake news with high accuracy</p>
+    </div>
+  </section>
+
+  <!-- Dashboard Features Section -->
+  <section class="features-section">
+    <div class="features-container">
+      <h2 class="features-title">Dashboard Features</h2>
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-icon">🔍</div>
+          <div class="feature-title">AI Analysis</div>
+          <div class="feature-description">Advanced machine learning algorithms analyze text patterns and credibility indicators</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📊</div>
+          <div class="feature-title">Confidence Scoring</div>
+          <div class="feature-description">Get detailed confidence scores and explanations for each analysis result</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📈</div>
+          <div class="feature-title">History Tracking</div>
+          <div class="feature-description">View and manage your past predictions with detailed analytics and insights</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">⚡</div>
+          <div class="feature-title">Real-time Processing</div>
+          <div class="feature-description">Instant analysis of news articles with fast, accurate results in seconds</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Analysis Form Section -->
+  <section class="hero-section">
+    <div class="analysis-form-container">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('text')">Paste Text</button>
+        <button class="tab-btn" onclick="switchTab('url')">Analyze URL</button>
+      </div>
+
+      <!-- Text Input -->
+      <div id="text-input" class="input-content active">
+        <div class="form-group">
+          <label class="form-label">News Article Text</label>
+          <textarea id="article-text" class="form-textarea" placeholder="Paste the news article text here..."></textarea>
+        </div>
+        <button class="analyze-btn" onclick="analyzeText()">Analyze Article</button>
+      </div>
+
+      <!-- URL Input -->
+      <div id="url-input" class="input-content" style="display: none;">
+        <div class="form-group">
+          <label class="form-label">News Article URL</label>
+          <input type="text" id="article-url" class="form-input" placeholder="Enter article URL (try 'test' for demo)...">
+        </div>
+        <button class="analyze-btn" onclick="analyzeUrl()">Analyze URL</button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Analyzing article...</p>
+    </div>
+
+    <!-- Results -->
+    <div class="result-section" id="result-section">
+      <!-- Results will be inserted here -->
+    </div>
+  </section>
+
+  <script>
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.input-content').forEach(content => content.style.display = 'none');
+      
+      event.target.classList.add('active');
+      document.getElementById(tab + '-input').style.display = 'block';
+    }
+
+    async function analyzeText() {
+      const text = document.getElementById('article-text').value;
+      if (!text.trim()) {
+        alert('Please enter article text');
+        return;
+      }
+      await performAnalysis({ text: text });
+    }
+
+    async function analyzeUrl() {
+      const url = document.getElementById('article-url').value;
+      if (!url.trim()) {
+        alert('Please enter article URL');
+        return;
+      }
+      await performAnalysis({ url: url });
+    }
+
+    async function performAnalysis(data) {
+      showLoading();
+      
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        
+        if (response.status === 401) {
+          alert('Please login to analyze articles.');
+          window.location.href = '/login';
+          return;
+        }
+        
+        if (result.success) {
+          displayResult(result);
+        } else {
+          alert('Error: ' + (result.error || 'Analysis failed'));
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function showLoading() {
+      document.getElementById('loading').classList.add('show');
+      document.getElementById('result-section').classList.remove('show');
+    }
+
+    function hideLoading() {
+      document.getElementById('loading').classList.remove('show');
+    }
+
+    function displayResult(data) {
+      const result = data.result;
+      const statusClass = result.prediction === 'FAKE' ? 'fake' : 'real';
+      const icon = result.prediction === 'FAKE' ? '🚫' : '✅';
+
+      const html = `
+        <div class="result-header ${statusClass}">
+          <div class="result-icon">${icon}</div>
+          <div class="result-status">${result.prediction} NEWS</div>
+          <div class="result-confidence">Confidence: ${result.confidence}</div>
+        </div>
+        <p style="text-align: center; margin-top: 16px; color: #666;">
+          ${result.verdict}
+        </p>
+      `;
+
+      document.getElementById('result-section').innerHTML = html;
+      document.getElementById('result-section').classList.add('show');
+      document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+      
+      // Clear form
+      document.getElementById('article-text').value = '';
+      document.getElementById('article-url').value = '';
+    }
+  </script>
+</body>
+</html>

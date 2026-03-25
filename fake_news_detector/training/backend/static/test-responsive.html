@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnswersQ Theme - Responsive Design Test</title>
+    <link rel="stylesheet" href="css/answersq-style.css">
+    <style>
+        /* Test-specific styles */
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+        
+        .test-section {
+            margin-bottom: var(--spacing-3xl);
+            padding: var(--spacing-xl);
+            background-color: var(--background-white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .test-title {
+            color: var(--primary-green);
+            border-bottom: 2px solid var(--primary-green-light);
+            padding-bottom: var(--spacing-sm);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .color-swatch {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            border-radius: var(--border-radius);
+            margin: var(--spacing-xs);
+            border: 2px solid var(--border-light);
+            position: relative;
+        }
+        
+        .color-swatch::after {
+            content: attr(data-color);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: var(--font-size-xs);
+            white-space: nowrap;
+        }
+        
+        .typography-sample {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .spacing-demo {
+            background-color: var(--primary-green-bg);
+            border: 1px dashed var(--primary-green);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .responsive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-xl);
+        }
+        
+        .test-card {
+            background-color: var(--background-white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .breakpoint-indicator {
+            position: fixed;
+            top: var(--spacing-lg);
+            right: var(--spacing-lg);
+            background-color: var(--primary-green);
+            color: var(--text-white);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-bold);
+            z-index: var(--z-fixed);
+        }
+        
+        /* Responsive indicators */
+        .breakpoint-indicator::after {
+            content: 'Desktop (>768px)';
+        }
+        
+        @media (max-width: 768px) {
+            .breakpoint-indicator::after {
+                content: 'Tablet (≤768px)';
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .breakpoint-indicator::after {
+                content: 'Mobile (≤480px)';
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="breakpoint-indicator"></div>
+    
+    <!-- Header Test -->
+    <header class="answersq-header">
+        <div class="header-container">
+            <div class="header-brand">
+                <h1 class="app-title">
+                    <span class="app-icon">📰</span>
+                    Fake News Detector
+                </h1>
+            </div>
+            <nav class="header-nav">
+                <a href="#" class="nav-link">Home</a>
+                <a href="#" class="nav-link active">Browse Articles</a>
+                <button class="nav-btn primary">Add News</button>
+                <button class="nav-btn secondary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section Test -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <h2 class="hero-title">Find the best news analysis for you.</h2>
+            <div class="search-container">
+                <input type="search" placeholder="What do you want to search for?" autocomplete="off">
+                <button class="search-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <div class="test-container">
+        <!-- Color Scheme Test -->
+        <section class="test-section">
+            <h2 class="test-title">Color Scheme Test</h2>
+            <div>
+                <h3>Primary Green Palette</h3>
+                <div class="color-swatch" style="background-color: var(--primary-green);" data-color="Primary"></div>
+                <div class="color-swatch" style="background-color: var(--primary-green-dark);" data-color="Dark"></div>
+                <div class="color-swatch" style="background-color: var(--primary-green-light);" data-color="Light"></div>
+                <div class="color-swatch" style="background-color: var(--primary-green-bg);" data-color="Background"></div>
+                
+                <h3 style="margin-top: var(--spacing-2xl);">Text Colors</h3>
+                <div class="color-swatch" style="background-color: var(--text-primary);" data-color="Primary"></div>
+                <div class="color-swatch" style="background-color: var(--text-secondary);" data-color="Secondary"></div>
+                <div class="color-swatch" style="background-color: var(--text-muted);" data-color="Muted"></div>
+            </div>
+        </section>
+
+        <!-- Typography Test -->
+        <section class="test-section">
+            <h2 class="test-title">Typography Test</h2>
+            <div class="typography-sample">
+                <h1>Heading 1 - Main Title</h1>
+                <h2>Heading 2 - Section Title</h2>
+                <h3>Heading 3 - Subsection</h3>
+                <h4>Heading 4 - Article Title</h4>
+                <h5>Heading 5 - Small Heading</h5>
+                <h6>Heading 6 - Smallest Heading</h6>
+                <p>This is a paragraph with <strong>bold text</strong>, <em>italic text</em>, and a <a href="#">link</a>. The typography should be clean and readable across all devices.</p>
+                <small>This is small text for metadata and secondary information.</small>
+                <br><br>
+                <code>This is inline code text</code>
+            </div>
+        </section>
+
+        <!-- Button Test -->
+        <section class="test-section">
+            <h2 class="test-title">Button Styles Test</h2>
+            <div style="display: flex; gap: var(--spacing-lg); flex-wrap: wrap; margin-bottom: var(--spacing-xl);">
+                <button class="btn btn-primary">Primary Button</button>
+                <button class="btn btn-secondary">Secondary Button</button>
+                <button class="btn btn-outline">Outline Button</button>
+                <button class="btn btn-success">Success Button</button>
+                <button class="btn btn-warning">Warning Button</button>
+                <button class="btn btn-error">Error Button</button>
+            </div>
+            <div style="display: flex; gap: var(--spacing-lg); flex-wrap: wrap;">
+                <button class="btn btn-primary btn-sm">Small Primary</button>
+                <button class="btn btn-secondary btn-lg">Large Secondary</button>
+                <button class="btn btn-primary" disabled>Disabled Button</button>
+            </div>
+        </section>
+
+        <!-- Spacing Test -->
+        <section class="test-section">
+            <h2 class="test-title">Spacing Scale Test</h2>
+            <div class="spacing-demo" style="padding: var(--spacing-xs);">XS Spacing (4px)</div>
+            <div class="spacing-demo" style="padding: var(--spacing-sm);">SM Spacing (8px)</div>
+            <div class="spacing-demo" style="padding: var(--spacing-md);">MD Spacing (12px)</div>
+            <div class="spacing-demo" style="padding: var(--spacing-lg);">LG Spacing (16px)</div>
+            <div class="spacing-demo" style="padding: var(--spacing-xl);">XL Spacing (24px)</div>
+            <div class="spacing-demo" style="padding: var(--spacing-2xl);">2XL Spacing (32px)</div>
+        </section>
+
+        <!-- Article Item Test -->
+        <section class="test-section">
+            <h2 class="test-title">Article Item Test</h2>
+            <div class="article-list">
+                <div class="article-item">
+                    <div class="article-header">
+                        <div class="article-prediction real">Real News</div>
+                        <div class="article-content">
+                            <h3 class="article-title">Sample Article Title for Testing Typography and Layout</h3>
+                            <div class="article-meta">
+                                <span class="article-meta-item">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    </svg>
+                                    By Test Author
+                                </span>
+                                <span class="article-meta-item">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+                                        <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                                    </svg>
+                                    2 hours ago
+                                </span>
+                            </div>
+                            <p class="article-preview">This is a preview of the article content. It should be limited to two lines and show an ellipsis when the content is too long to fit in the available space.</p>
+                        </div>
+                    </div>
+                    <div class="article-footer">
+                        <div class="article-confidence">Confidence: 95%</div>
+                        <div class="article-actions">
+                            <button class="article-btn">View Details</button>
+                            <button class="article-btn">Share</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="article-item">
+                    <div class="article-header">
+                        <div class="article-prediction fake">Fake News</div>
+                        <div class="article-content">
+                            <h3 class="article-title">Another Sample Article with Fake News Prediction</h3>
+                            <div class="article-meta">
+                                <span class="article-meta-item">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    </svg>
+                                    By Another Author
+                                </span>
+                                <span class="article-meta-item">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+                                        <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                                    </svg>
+                                    1 day ago
+                                </span>
+                            </div>
+                            <p class="article-preview">This article has been flagged as potentially fake news. The preview text demonstrates how the layout handles different content lengths and maintains consistent spacing.</p>
+                        </div>
+                    </div>
+                    <div class="article-footer">
+                        <div class="article-confidence">Confidence: 87%</div>
+                        <div class="article-actions">
+                            <button class="article-btn">View Details</button>
+                            <button class="article-btn">Share</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Responsive Grid Test -->
+        <section class="test-section">
+            <h2 class="test-title">Responsive Grid Test</h2>
+            <div class="responsive-grid">
+                <div class="test-card">
+                    <h4>Card 1</h4>
+                    <p>This card should stack vertically on mobile devices and display in a grid on larger screens.</p>
+                </div>
+                <div class="test-card">
+                    <h4>Card 2</h4>
+                    <p>The grid should automatically adjust the number of columns based on the available space.</p>
+                </div>
+                <div class="test-card">
+                    <h4>Card 3</h4>
+                    <p>All cards should maintain consistent spacing and proportions across different screen sizes.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Form Test -->
+        <section class="test-section">
+            <h2 class="test-title">Form Elements Test</h2>
+            <form>
+                <div class="form-group">
+                    <label class="form-label">Sample Input Field</label>
+                    <input type="text" placeholder="Enter some text here...">
+                    <div class="form-help">This is help text for the input field.</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Sample Textarea</label>
+                    <textarea class="form-textarea" placeholder="Enter a longer text here..."></textarea>
+                    <div class="form-help">This textarea should resize vertically.</div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <script>
+        // Simple responsive test script
+        function checkResponsiveness() {
+            const width = window.innerWidth;
+            const indicator = document.querySelector('.breakpoint-indicator');
+            
+            // Test color contrast
+            const computedStyle = getComputedStyle(document.documentElement);
+            const primaryGreen = computedStyle.getPropertyValue('--primary-green').trim();
+            const textPrimary = computedStyle.getPropertyValue('--text-primary').trim();
+            
+            console.log('Current viewport width:', width);
+            console.log('Primary green color:', primaryGreen);
+            console.log('Primary text color:', textPrimary);
+            
+            // Test spacing consistency
+            const spacingLg = computedStyle.getPropertyValue('--spacing-lg').trim();
+            console.log('Large spacing value:', spacingLg);
+            
+            // Test font sizes
+            const fontSizeBase = computedStyle.getPropertyValue('--font-size-base').trim();
+            console.log('Base font size:', fontSizeBase);
+        }
+        
+        // Run tests on load and resize
+        window.addEventListener('load', checkResponsiveness);
+        window.addEventListener('resize', checkResponsiveness);
+        
+        // Test hover effects
+        document.querySelectorAll('.article-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                console.log('Article item hover effect triggered');
+            });
+        });
+        
+        // Test button interactions
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Button clicked:', btn.textContent.trim());
+            });
+        });
+        
+        console.log('AnswersQ Theme Responsive Test Loaded');
+        console.log('Resize the window to test different breakpoints');
+    </script>
+</body>
+</html>

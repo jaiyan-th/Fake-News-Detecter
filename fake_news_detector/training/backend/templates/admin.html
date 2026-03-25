@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <h2>All Users' Predictions</h2>
+
+    {% if records %}
+        <ul>
+        {% for record in records %}
+            <li>
+                <strong>User:</strong> {{ record.username }}<br>
+                <strong>News:</strong> {{ record.news }}<br>
+                <strong>Prediction:</strong> {{ record.prediction }}<br>
+                <strong>Timestamp:</strong> {{ record.timestamp }}
+            </li>
+            <br>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No prediction records found.</p>
+    {% endif %}
+
+    <a href="{{ url_for('home') }}">Back</a>
+</body>
+</html>
