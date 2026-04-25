@@ -45,20 +45,25 @@ def create_app():
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
     
-    # Database configuration - use Config.DATABASE_PATH which has absolute path
-    database_path = AppConfig.DATABASE_PATH
+    # Database configuration
+    supabase_url = os.environ.get('SUPABASE_DB_URL')
     
-    # Ensure the path is absolute and properly formatted for SQLite URI
-    if not os.path.isabs(database_path):
-        database_path = os.path.abspath(database_path)
-    
-    # Convert Windows path to URI format (forward slashes)
-    database_path = database_path.replace('\\', '/')
-    
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    
-    print(f"Database URI: sqlite:///{database_path}")
+    if supabase_url:
+        # SQLAlchemy requires postgresql:// or postgresql+psycopg2://
+        app.config['SQLALCHEMY_DATABASE_URI'] = supabase_url
+        print(f"Database URI: Supabase PostgreSQL connected")
+    else:
+        database_path = AppConfig.DATABASE_PATH
+        
+        # Ensure the path is absolute and properly formatted for SQLite URI
+        if not os.path.isabs(database_path):
+            database_path = os.path.abspath(database_path)
+        
+        # Convert Windows path to URI format (forward slashes)
+        database_path = database_path.replace('\\', '/')
+        
+        app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
+        print(f"Database URI: sqlite:///{database_path}")
     
     # Initialize extensions
     db.init_app(app)
@@ -72,10 +77,12 @@ def create_app():
         try:
             # Import models to ensure they're registered
             from models.user_analysis import UserAnalysis
+            from models.knowledge import KnowledgeArticle
+            from models.database import AnalysisCache
             db.create_all()
-            print("✓ Database tables created/verified")
+            print("[OK] Database tables created/verified")
         except Exception as e:
-            print(f"⚠ Database initialization warning: {e}")
+            print(f"[WARNING] Database initialization warning: {e}")
             print("  Database will be created on first use")
     
     # Configure CORS with credentials support

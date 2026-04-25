@@ -392,6 +392,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             switchSection(navVerify, verifySection);
         }
     });
+
+    document.getElementById('btn-learn-more')?.addEventListener('click', () => {
+        const featuresSection = document.querySelector('.features-header');
+        if (featuresSection) {
+            featuresSection.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            switchSection(navAbout, aboutSection);
+        }
+    });
     
     document.getElementById('btn-new-analysis-history')?.addEventListener('click', () => {
         switchSection(navVerify, verifySection);

@@ -54,7 +54,8 @@ AI-powered fake news detection system using advanced NLP, semantic analysis, and
 
 ### AI-Powered Detection
 - 🤖 **LLM Analysis** - Groq-powered explanations and reasoning
-- 🔍 **Semantic Similarity** - Compare with trusted news sources
+- 🧠 **RAG Pipeline** - Long-term memory using Supabase `pgvector` to remember and retrieve historical fact-checks
+- 🔍 **Semantic Similarity** - Compare with trusted news sources using vector embeddings
 - 📊 **Pattern Detection** - Identify fake news indicators
 - 🎯 **Credibility Assessment** - Evaluate source trustworthiness
 - ⚡ **Contradiction Checking** - Detect conflicting claims
@@ -145,6 +146,10 @@ See [fake-news-detector/API_USAGE.md](fake-news-detector/API_USAGE.md) for compl
 GROQ_API_KEY=your-groq-api-key-here
 NEWS_API_KEY=your-news-api-key-here
 
+# Supabase PostgreSQL (Required)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_DB_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/postgres
+
 # Flask Configuration
 SECRET_KEY=your-secret-key-here
 FLASK_DEBUG=true
@@ -200,10 +205,10 @@ curl http://localhost:3000/health
 
 ### Backend
 - **Framework**: Flask (Python)
-- **Database**: SQLite
+- **Database**: Supabase PostgreSQL (with `pgvector` for RAG), SQLAlchemy ORM
 - **LLM**: Groq API (llama-3.1-8b-instant)
 - **News API**: NewsAPI.org
-- **Embeddings**: sentence-transformers
+- **Embeddings**: sentence-transformers (all-MiniLM-L6-v2)
 - **Authentication**: Flask-Login, Google OAuth
 
 ### Frontend

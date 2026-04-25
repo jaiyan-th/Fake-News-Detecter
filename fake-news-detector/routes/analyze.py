@@ -610,11 +610,25 @@ def analyze_url():
         # Step 6: Compute semantic similarities
         similarity_start = time.time()
         try:
+            # --- RAG: Retrieve from Knowledge Base ---
+            kb_scores = []
+            try:
+                kb_scores = services['similarity'].search_knowledge_base(article, top_k=2)
+                if kb_scores:
+                    print(f"Found {len(kb_scores)} historical articles in Knowledge Base")
+            except Exception as e:
+                print(f"Failed to query Knowledge Base: {e}")
+                
             similarity_scores = run_with_timeout(
                 services['similarity'].compute_similarities,
                 args=(article, related_articles),
                 timeout_seconds=15  # Increased from 6 to 15 seconds for more articles
             )
+            
+            # Combine RAG scores with live web scores, sort by highest similarity
+            similarity_scores.extend(kb_scores)
+            similarity_scores.sort(key=lambda x: x.score, reverse=True)
+            
             similarity_duration = time.time() - similarity_start
             avg_similarity = sum(score.score for score in similarity_scores) / len(similarity_scores) if similarity_scores else 0
             performance_logger.log_similarity_analysis(
@@ -667,6 +681,14 @@ def analyze_url():
                         'adjustment_factor': confidence_adjustment
                     }
                 )
+            
+            # --- RAG: Index High-Confidence Trusted Results ---
+            if result.verdict.value == "REAL" and result.confidence > 0.8:
+                try:
+                    # Index the live article we analyzed into our historical Knowledge Base
+                    services['similarity'].index_article(article, result.verdict.value, is_trusted=True)
+                except Exception as e:
+                    print(f"Failed to index article into RAG: {e}")
         
         except TimeoutError as e:
             performance_logger.log_timeout(request_id, "decision_making", 8)
@@ -1044,11 +1066,25 @@ def analyze_text():
         
         similarity_start = time.time()
         try:
+            # --- RAG: Retrieve from Knowledge Base ---
+            kb_scores = []
+            try:
+                kb_scores = services['similarity'].search_knowledge_base(text_article, top_k=2)
+                if kb_scores:
+                    print(f"Found {len(kb_scores)} historical articles in Knowledge Base")
+            except Exception as e:
+                print(f"Failed to query Knowledge Base: {e}")
+                
             similarity_scores = run_with_timeout(
                 services['similarity'].compute_similarities,
                 args=(text_article, related_articles),
                 timeout_seconds=15  # Increased from 60 to 15 seconds (was too high)
             )
+            
+            # Combine RAG scores with live web scores, sort by highest similarity
+            similarity_scores.extend(kb_scores)
+            similarity_scores.sort(key=lambda x: x.score, reverse=True)
+            
             similarity_duration = time.time() - similarity_start
             avg_similarity = sum(score.score for score in similarity_scores) / len(similarity_scores) if similarity_scores else 0
             performance_logger.log_similarity_analysis(request_id, similarity_duration, len(similarity_scores), avg_similarity)
@@ -1077,21 +1113,32 @@ def analyze_text():
         try:
             result = run_with_timeout(
                 services['decision'].make_decision,
-                kwargs={
-                    'similarity_scores': similarity_scores,
-                    'summary': summary,
-                    'claims': key_claims,
-                    'related_articles': related_articles,
-                    'pattern_result': pattern_result,
-                    'input_source': detected_source
-                },
+                args=(similarity_scores, summary, key_claims, related_articles, pattern_result, detected_source),
                 timeout_seconds=8
             )
             decision_duration = time.time() - decision_start
             performance_logger.log_decision_making(request_id, decision_duration, result.verdict.value, result.confidence)
             
-            if 'confidence_adjustment' in locals():
+            # Apply language confidence adjustment
+            if 'confidence_adjustment' in locals() and confidence_adjustment != 1.0:
+                original_confidence = result.confidence
                 result.confidence = max(0.1, min(1.0, result.confidence * confidence_adjustment))
+                
+                if language_result and language_result.fallback_used:
+                    language_info = f" [Language: {language_result.language}, fallback applied]"
+                    result.explanation += language_info
+                
+                performance_logger.log_step(request_id, "language_confidence_adjustment", details={'adjusted': result.confidence})
+            
+            # --- RAG: Index High-Confidence Trusted Results ---
+            if result.verdict.value == "REAL" and result.confidence > 0.8:
+                try:
+                    # Index the text content (if it's long enough to be an article)
+                    if len(text_content) > 100:
+                        services['similarity'].index_article(text_article, result.verdict.value, is_trusted=True)
+                except Exception as e:
+                    print(f"Failed to index text into RAG: {e}")
+        
         except TimeoutError as e:
             performance_logger.log_timeout(request_id, "decision_making", 8)
             return error_handler.create_error_response(

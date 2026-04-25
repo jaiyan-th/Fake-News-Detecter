@@ -134,6 +134,74 @@ class SimilarityEngine:
         
         source_lower = source.lower()
         return any(trusted in source_lower for trusted in trusted_sources)
+        
+    def search_knowledge_base(self, target_article: ArticleContent, top_k: int = 3) -> List[SimilarityScore]:
+        """Search the Supabase Vector database for similar verified articles (RAG Retrieval)"""
+        from models.knowledge import KnowledgeArticle
+        from models.user import db
+        
+        try:
+            target_text = f"{target_article.title} {target_article.content}"
+            target_embedding = self.generate_embedding(target_text)
+            
+            # Using pgvector's cosine distance operator (<=>)
+            similar_articles = db.session.query(KnowledgeArticle).order_by(
+                KnowledgeArticle.embedding.cosine_distance(target_embedding)
+            ).limit(top_k).all()
+            
+            scores = []
+            for article in similar_articles:
+                # Recompute exact similarity for the score
+                article_text = f"{article.title} {article.content}"
+                article_embedding = self.generate_embedding(article_text)
+                similarity = self._cosine_similarity(target_embedding, article_embedding)
+                
+                # Check if it meets a reasonable threshold (e.g. > 0.6)
+                if similarity > 0.6:
+                    score = SimilarityScore(
+                        article_url=article.url,
+                        score=similarity,
+                        source=f"Knowledge Base ({article.source})",
+                        is_trusted=True, # It's in our KB
+                        article_title=f"[RAG Context] {article.title}"
+                    )
+                    scores.append(score)
+            
+            return scores
+        except Exception as e:
+            print(f"RAG search failed: {str(e)}")
+            return []
+
+    def index_article(self, article: ArticleContent, verdict: str, is_trusted: bool):
+        """Index a verified article into the Supabase Vector Database (RAG Ingestion)"""
+        from models.knowledge import KnowledgeArticle
+        from models.user import db
+        
+        try:
+            # Check if it already exists
+            existing = KnowledgeArticle.query.filter_by(url=article.url).first()
+            if existing:
+                return
+                
+            article_text = f"{article.title} {article.content}"
+            embedding = self.generate_embedding(article_text)
+            
+            record = KnowledgeArticle(
+                url=article.url,
+                title=article.title,
+                content=article.content,
+                source=article.source,
+                verdict=verdict,
+                is_trusted=is_trusted,
+                embedding=embedding
+            )
+            db.session.add(record)
+            db.session.commit()
+            print(f"Indexed article into knowledge base: {article.title}")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Failed to index article: {str(e)}")
+
     
     def clear_cache(self):
         """Clear embedding cache to free memory"""

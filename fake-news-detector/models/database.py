@@ -1,139 +1,93 @@
 """
-Database models and operations
+Database models and operations using SQLAlchemy
 """
 
-import sqlite3
 import os
+import json
 from typing import Optional, List, Dict
-from datetime import datetime
-from contextlib import contextmanager
+from datetime import datetime, timedelta
+from sqlalchemy.orm import Session
+from sqlalchemy import desc, func
+from models.user import db
+
+class AnalysisCache(db.Model):
+    """Anonymous analysis results table"""
+    __tablename__ = 'analysis'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    url = db.Column(db.String(512), unique=True, nullable=False, index=True)
+    summary = db.Column(db.Text)
+    verdict = db.Column(db.String(50), nullable=False)
+    confidence = db.Column(db.Float, nullable=False)
+    explanation = db.Column(db.Text)
+    matched_articles = db.Column(db.Text)
+    key_claims = db.Column(db.Text)
+    processing_time = db.Column(db.Float)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
 class Database:
     """Database service for persistent storage"""
     
-    def __init__(self, db_path: str):
+    def __init__(self, db_path: str = None):
+        # We don't need db_path anymore since we use SQLAlchemy's connection
         self.db_path = db_path
-        self._ensure_directory_exists()
-        self._init_database()
-    
-    def _ensure_directory_exists(self):
-        """Ensure database directory exists"""
-        db_dir = os.path.dirname(self.db_path)
-        if db_dir and not os.path.exists(db_dir):
-            os.makedirs(db_dir, exist_ok=True)
-    
-    def _init_database(self):
-        """Initialize database schema"""
-        try:
-            with self.get_connection() as conn:
-                # Analysis results table
-                conn.execute('''
-                    CREATE TABLE IF NOT EXISTS analysis (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        url TEXT UNIQUE NOT NULL,
-                        summary TEXT,
-                        verdict TEXT NOT NULL,
-                        confidence REAL NOT NULL,
-                        explanation TEXT,
-                        matched_articles TEXT,
-                        key_claims TEXT,
-                        processing_time REAL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    )
-                ''')
-                
-                # Create index on URL for faster lookups
-                conn.execute('''
-                    CREATE INDEX IF NOT EXISTS idx_analysis_url 
-                    ON analysis(url)
-                ''')
-                
-                # Create index on created_at for time-based queries
-                conn.execute('''
-                    CREATE INDEX IF NOT EXISTS idx_analysis_created_at 
-                    ON analysis(created_at)
-                ''')
-                
-                conn.commit()
-                
-        except Exception as e:
-            print(f"Database initialization failed: {str(e)}")
-            raise
-    
-    @contextmanager
-    def get_connection(self):
-        """Get database connection with proper error handling"""
-        conn = None
-        try:
-            conn = sqlite3.connect(self.db_path, timeout=30.0)
-            conn.row_factory = sqlite3.Row
-            yield conn
-        except Exception as e:
-            if conn:
-                conn.rollback()
-            raise e
-        finally:
-            if conn:
-                conn.close()
     
     def store_analysis(self, url: str, summary: str, verdict: str, 
                       confidence: float, explanation: str = "", 
                       matched_articles: List[Dict] = None, 
                       key_claims: List[str] = None,
                       processing_time: float = 0.0) -> Optional[int]:
-        """
-        Store analysis result in database
-        Uses INSERT OR REPLACE to handle URL uniqueness constraint
-        
-        Returns:
-            Analysis ID if successful, None otherwise
-        """
+        """Store or update analysis result in database"""
         try:
-            import json
-            
             matched_articles_json = json.dumps(matched_articles or [])
             key_claims_json = json.dumps(key_claims or [])
             
-            with self.get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute('''
-                    INSERT OR REPLACE INTO analysis 
-                    (url, summary, verdict, confidence, explanation, 
-                     matched_articles, key_claims, processing_time)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (
-                    url, summary, verdict, confidence, explanation,
-                    matched_articles_json, key_claims_json, processing_time
-                ))
+            # Check if exists
+            record = AnalysisCache.query.filter_by(url=url).first()
+            if record:
+                record.summary = summary
+                record.verdict = verdict
+                record.confidence = confidence
+                record.explanation = explanation
+                record.matched_articles = matched_articles_json
+                record.key_claims = key_claims_json
+                record.processing_time = processing_time
+                record.created_at = datetime.utcnow()
+            else:
+                record = AnalysisCache(
+                    url=url, summary=summary, verdict=verdict,
+                    confidence=confidence, explanation=explanation,
+                    matched_articles=matched_articles_json,
+                    key_claims=key_claims_json, processing_time=processing_time
+                )
+                db.session.add(record)
                 
-                analysis_id = cursor.lastrowid
-                conn.commit()
-                
-                return analysis_id
+            db.session.commit()
+            return record.id
                 
         except Exception as e:
+            db.session.rollback()
             print(f"Analysis storage failed: {str(e)}")
             return None
     
     def get_analysis_by_url(self, url: str) -> Optional[Dict]:
         """Retrieve most recent analysis for a URL"""
         try:
-            with self.get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute('''
-                    SELECT * FROM analysis 
-                    WHERE url = ? 
-                    ORDER BY created_at DESC 
-                    LIMIT 1
-                ''', (url,))
-                
-                row = cursor.fetchone()
-                
-                if row:
-                    return dict(row)
-                
-                return None
-                
+            record = AnalysisCache.query.filter_by(url=url).order_by(desc(AnalysisCache.created_at)).first()
+            if record:
+                return {
+                    'id': record.id,
+                    'url': record.url,
+                    'summary': record.summary,
+                    'verdict': record.verdict,
+                    'confidence': record.confidence,
+                    'explanation': record.explanation,
+                    'matched_articles': record.matched_articles,
+                    'key_claims': record.key_claims,
+                    'processing_time': record.processing_time,
+                    'created_at': record.created_at
+                }
+            return None
         except Exception as e:
             print(f"Analysis retrieval failed: {str(e)}")
             return None
@@ -141,18 +95,14 @@ class Database:
     def get_recent_analyses(self, limit: int = 10) -> List[Dict]:
         """Get recent analysis results"""
         try:
-            with self.get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute('''
-                    SELECT id, url, verdict, confidence, created_at 
-                    FROM analysis 
-                    ORDER BY created_at DESC 
-                    LIMIT ?
-                ''', (limit,))
-                
-                rows = cursor.fetchall()
-                return [dict(row) for row in rows]
-                
+            records = AnalysisCache.query.order_by(desc(AnalysisCache.created_at)).limit(limit).all()
+            return [
+                {
+                    'id': r.id, 'url': r.url, 'verdict': r.verdict,
+                    'confidence': r.confidence, 'created_at': r.created_at
+                }
+                for r in records
+            ]
         except Exception as e:
             print(f"Recent analyses retrieval failed: {str(e)}")
             return []
@@ -160,31 +110,20 @@ class Database:
     def get_analysis_stats(self) -> Dict:
         """Get analysis statistics"""
         try:
-            with self.get_connection() as conn:
-                cursor = conn.cursor()
-                
-                # Total analyses
-                cursor.execute('SELECT COUNT(*) as total FROM analysis')
-                total = cursor.fetchone()['total']
-                
-                # Verdict distribution
-                cursor.execute('''
-                    SELECT verdict, COUNT(*) as count 
-                    FROM analysis 
-                    GROUP BY verdict
-                ''')
-                verdict_stats = {row['verdict']: row['count'] for row in cursor.fetchall()}
-                
-                # Average confidence
-                cursor.execute('SELECT AVG(confidence) as avg_confidence FROM analysis')
-                avg_confidence = cursor.fetchone()['avg_confidence'] or 0.0
-                
-                return {
-                    'total_analyses': total,
-                    'verdict_distribution': verdict_stats,
-                    'average_confidence': round(avg_confidence, 3)
-                }
-                
+            total = db.session.query(func.count(AnalysisCache.id)).scalar() or 0
+            
+            verdict_counts = db.session.query(
+                AnalysisCache.verdict, func.count(AnalysisCache.id)
+            ).group_by(AnalysisCache.verdict).all()
+            verdict_stats = {v: c for v, c in verdict_counts}
+            
+            avg_confidence = db.session.query(func.avg(AnalysisCache.confidence)).scalar() or 0.0
+            
+            return {
+                'total_analyses': total,
+                'verdict_distribution': verdict_stats,
+                'average_confidence': round(avg_confidence, 3)
+            }
         except Exception as e:
             print(f"Stats retrieval failed: {str(e)}")
             return {
@@ -196,18 +135,11 @@ class Database:
     def cleanup_old_analyses(self, days_old: int = 30) -> int:
         """Remove analyses older than specified days"""
         try:
-            with self.get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute('''
-                    DELETE FROM analysis 
-                    WHERE created_at < datetime('now', '-{} days')
-                '''.format(days_old))
-                
-                deleted_count = cursor.rowcount
-                conn.commit()
-                
-                return deleted_count
-                
+            cutoff_date = datetime.utcnow() - timedelta(days=days_old)
+            deleted_count = AnalysisCache.query.filter(AnalysisCache.created_at < cutoff_date).delete()
+            db.session.commit()
+            return deleted_count
         except Exception as e:
+            db.session.rollback()
             print(f"Cleanup failed: {str(e)}")
             return 0

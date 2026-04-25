@@ -19,3 +19,7 @@ newspaper3k==0.2.8
 
 # Additional utilities
 beautifulsoup4==4.12.2
+
+# Database & Vector Support
+psycopg2-binary>=2.9.9
+pgvector>=0.2.5

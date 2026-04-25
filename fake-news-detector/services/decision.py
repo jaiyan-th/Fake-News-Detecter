@@ -546,6 +546,10 @@ class DecisionEngine:
         # Get trusted sources
         trusted_sources = [score.source for score in similarity_scores[:3] if score.is_trusted]
         
+        # Check for RAG historical matches
+        rag_matches = sum(1 for score in similarity_scores if "Knowledge Base" in score.source)
+        rag_info = f"\n- Historical Context: {rag_matches} similar verified articles found in our Database" if rag_matches > 0 else ""
+        
         # Add input source information
         input_source_info = ""
         if input_source:
@@ -582,7 +586,7 @@ News Content Summary:
 Key Claims Being Verified:
 {', '.join(claims[:3]) if claims else 'None extracted'}
 
-Verification Analysis:{input_source_info}
+Verification Analysis:{input_source_info}{rag_info}
 - Similarity: Average {avg_similarity:.1%} across {total_articles} articles
 - Trusted Sources: {trusted_matches} matches from {', '.join(trusted_sources[:3]) if trusted_sources else 'None'}
 - Contradictions: {contradiction_info}
