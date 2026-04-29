@@ -90,6 +90,102 @@ class ApiService {
         return this._request('/analyze-url', { url });
     }
 
+    // ── RAG Pipeline endpoints ──────────────────────────────────────────────
+
+    async ragAnalyzeText(text) {
+        return this._ragRequest('/rag-analyze-text', { text });
+    }
+
+    async ragAnalyzeUrl(url) {
+        return this._ragRequest('/rag-analyze-url', { url });
+    }
+
+    /**
+     * Internal helper for RAG endpoints.
+     * Returns the raw RAG JSON (verdict, confidence, news_api_evidence,
+     * rag_evidence, gap_analysis, reasoning, final_explanation) plus a
+     * normalised `success` flag so the dashboard can handle errors uniformly.
+     */
+    async _ragRequest(endpoint, body) {
+        try {
+            console.log(`RAG Request to ${endpoint}:`, body);
+
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': 'frontend-client-key'
+                },
+                credentials: 'include',
+                body: JSON.stringify(body)
+            });
+
+            const data = await response.json();
+            console.log(`RAG Response from ${endpoint}:`, data);
+
+            if (response.ok) {
+                // Parse confidence string "85%" → 0.85
+                let confidenceValue = 0.5;
+                if (typeof data.confidence === 'string') {
+                    confidenceValue = parseFloat(data.confidence.replace('%', '')) / 100;
+                } else if (typeof data.confidence === 'number') {
+                    confidenceValue = data.confidence > 1 ? data.confidence / 100 : data.confidence;
+                }
+
+                const TRUSTED = ['bbc','reuters','associated press','cnn','npr',
+                    'the guardian','new york times','washington post',
+                    'wall street journal','bloomberg','the hindu','ndtv',
+                    'times of india','indian express','hindustan times'];
+
+                return {
+                    success: true,
+                    isRag: true,
+                    request_id: data.request_id || null,
+                    prediction: data.verdict || 'UNCERTAIN',
+                    confidence: confidenceValue,
+                    explanation: data.final_explanation || data.reasoning || 'Analysis completed',
+                    domain: 'RAG Pipeline',
+                    verified_sources: (data.news_api_evidence || []).map(ev => ({
+                        title:      ev.title,
+                        source:     ev.source,
+                        url:        ev.url,
+                        similarity: ev.similarity,
+                        is_trusted: TRUSTED.some(t => (ev.source || '').toLowerCase().includes(t)),
+                        stance:     ev.stance,
+                    })),
+                    processing_time: data.processing_time || 0,
+                    input_type: endpoint.includes('url') ? 'url' : 'text',
+                    llm_analysis: {
+                        enabled:  true,
+                        provider: 'Groq RAG',
+                        model:    'Llama 3.1 8B (Grounded)',
+                        summary:  data.reasoning || '',
+                        verdict:  data.verdict || 'UNCERTAIN',
+                        reasoning: [],
+                    },
+                    // Full RAG payload for the extended evidence + metrics panels
+                    rag: {
+                        claim_summary:      data.claim_summary,
+                        expanded_queries:   data.expanded_queries   || [],
+                        retrieval_stats:    data.retrieval_stats    || {},
+                        news_api_evidence:  data.news_api_evidence  || [],
+                        rag_evidence:       data.rag_evidence        || [],
+                        gap_analysis:       data.gap_analysis,
+                        reasoning:          data.reasoning,
+                        final_explanation:  data.final_explanation,
+                    },
+                    // STEP 12 metrics block
+                    metrics: data.metrics || null,
+                };
+            } else {
+                return { success: false, error: data.error || 'RAG analysis failed' };
+            }
+        } catch (error) {
+            console.error('RAG API Error:', error);
+            return { success: false, error: error.message || 'Network error occurred' };
+        }
+    }
+
     async analyzeImage(file) {
         const formData = new FormData();
         formData.append('image', file);

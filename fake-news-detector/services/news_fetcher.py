@@ -77,88 +77,122 @@ class NewsFetcher:
         return articles
     
     def _fetch_from_newsapi(self, query: str, keywords: List[str] = None) -> List[ArticleContent]:
-        """Fetch articles from NewsAPI with retry logic"""
-        for attempt in range(self.max_retries + 1):
-            try:
-                # Build optimized search query
-                search_query = self._build_optimized_search_query(query, keywords)
-                
-                # Rate limiting with exponential backoff
-                self._enforce_rate_limit_with_backoff(attempt)
-                
-                # Make API request
-                params = {
-                    'q': search_query,
-                    'apiKey': self.api_key,
-                    'language': 'en',
-                    'sortBy': 'relevancy',
-                    'pageSize': self.limit,
-                    'excludeDomains': 'facebook.com,twitter.com,instagram.com,reddit.com',  # Exclude social media
-                    'domains': self._get_trusted_domains()  # Focus on trusted sources
-                }
-                
-                response = requests.get(self.base_url, params=params, timeout=10)
-                response.raise_for_status()
-                
-                data = response.json()
-                
-                if data.get('status') != 'ok':
-                    error_msg = data.get('message', 'Unknown error')
+        """Fetch articles from NewsAPI with retry logic and progressive query broadening."""
+
+        # Build two query variants: specific (6 terms) and broad (3 terms)
+        query_specific = self._build_optimized_search_query(query, keywords)
+        query_broad    = ' '.join(query_specific.split()[:3]) if query_specific else query_specific
+
+        queries_to_try = [query_specific]
+        if query_broad and query_broad != query_specific:
+            queries_to_try.append(query_broad)
+
+        for search_query in queries_to_try:
+            if not search_query:
+                continue
+
+            for attempt in range(self.max_retries + 1):
+                try:
+                    self._enforce_rate_limit_with_backoff(attempt)
+
+                    params = {
+                        'q': search_query,
+                        'apiKey': self.api_key,
+                        'language': 'en',
+                        'sortBy': 'relevancy',
+                        'pageSize': self.limit,
+                        'excludeDomains': 'facebook.com,twitter.com,instagram.com,reddit.com',
+                    }
+
+                    response = requests.get(self.base_url, params=params, timeout=10)
+                    response.raise_for_status()
+                    data = response.json()
+
+                    if data.get('status') != 'ok':
+                        error_msg = data.get('message', 'Unknown error')
+                        print(f"News API error (query='{search_query}'): {error_msg}")
+                        break  # Try next query variant
+
+                    raw_articles = []
+                    for article_data in data.get('articles', []):
+                        if self._is_valid_article(article_data):
+                            raw_articles.append(self._convert_to_article_content(article_data))
+
+                    if raw_articles:
+                        print(f"✓ NewsAPI returned {len(raw_articles)} articles for query: '{search_query}'")
+                        return self._filter_and_rank_articles(raw_articles, query, keywords)[:self.limit]
+
+                    print(f"⚠ NewsAPI returned 0 articles for query: '{search_query}'")
+                    break  # 0 results — try next query variant
+
+                except requests.exceptions.RequestException as e:
                     if attempt < self.max_retries:
-                        print(f"News API error (attempt {attempt + 1}): {error_msg}, retrying...")
-                        continue
+                        delay = self._calculate_backoff_delay(attempt)
+                        print(f"Network error (attempt {attempt+1}): {e}, retrying in {delay:.1f}s...")
+                        time.sleep(delay)
                     else:
-                        raise ValueError(f"News API error: {error_msg}")
-                
-                articles = []
-                for article_data in data.get('articles', []):
-                    if self._is_valid_article(article_data):
-                        article = self._convert_to_article_content(article_data)
-                        articles.append(article)
-                
-                # Filter and rank by relevance
-                filtered_articles = self._filter_and_rank_articles(articles, query, keywords)
-                
-                return filtered_articles[:self.limit]  # Return top results
-                
-            except requests.exceptions.RequestException as e:
-                if attempt < self.max_retries:
-                    delay = self._calculate_backoff_delay(attempt)
-                    print(f"Network error (attempt {attempt + 1}): {str(e)}, retrying in {delay}s...")
-                    time.sleep(delay)
-                    continue
-                else:
-                    print(f"News fetching failed after {self.max_retries + 1} attempts: {str(e)}")
-                    return []
-            except Exception as e:
-                if attempt < self.max_retries:
-                    delay = self._calculate_backoff_delay(attempt)
-                    print(f"Error (attempt {attempt + 1}): {str(e)}, retrying in {delay}s...")
-                    time.sleep(delay)
-                    continue
-                else:
-                    print(f"News fetching failed after {self.max_retries + 1} attempts: {str(e)}")
-                    return []
-        
-        return []  # Return empty list if all attempts failed
+                        print(f"News fetching failed after {self.max_retries+1} attempts: {e}")
+                        return []
+                except Exception as e:
+                    if attempt < self.max_retries:
+                        delay = self._calculate_backoff_delay(attempt)
+                        print(f"Error (attempt {attempt+1}): {e}, retrying in {delay:.1f}s...")
+                        time.sleep(delay)
+                    else:
+                        print(f"News fetching failed: {e}")
+                        return []
+
+        print("✗ No articles found from NewsAPI after all query variants")
+        return []
     
     def _build_optimized_search_query(self, query: str, keywords: List[str] = None) -> str:
-        """Build optimized search query focusing primarily on keywords for NewsAPI"""
+        """
+        Build optimized search query for NewsAPI.
+        NewsAPI works best with 3-6 meaningful keywords — NOT full sentences.
+        Strategy:
+          1. Extract proper nouns + key terms from the query (up to 6 words)
+          2. Supplement with provided keywords if needed
+        """
+        stop_words = {
+            'the','a','an','and','or','but','in','on','at','to','for','of',
+            'is','was','are','were','be','been','that','this','with','from',
+            'by','as','it','its','will','has','have','had','not','no','can',
+            'said','says','would','could','should','may','might','also','just',
+            'after','before','during','about','into','through','between','among',
+            'big','major','top','new','old','first','last','more','most','some',
+            'any','all','both','each','few','many','much','other','same','such',
+        }
+
+        # Collect candidate terms from query
+        candidates = []
+
+        # Prefer proper nouns (capitalized mid-sentence) — highest signal
+        proper_nouns = re.findall(r'\b[A-Z][a-zA-Z]{2,}\b', query)
+        for w in proper_nouns:
+            if w.lower() not in stop_words and w not in candidates:
+                candidates.append(w)
+
+        # Add meaningful lowercase words
+        all_words = re.findall(r'\b[a-zA-Z]{4,}\b', query)
+        for w in all_words:
+            if w.lower() not in stop_words and w not in candidates:
+                candidates.append(w)
+
+        # Supplement with provided keywords (already extracted by LLM)
         if keywords:
-            # NewsAPI returns 0 results when given full sentences. 
-            # We must exclusively use isolated keywords.
-            relevant_keywords = self._select_relevant_keywords(keywords, "")
-            # Join top 4 keywords
-            keyword_str = " ".join(relevant_keywords[:4])
-            return keyword_str.strip()
-            
-        if not query:
-            return ""
-            
-        cleaned_query = self._extract_key_phrases(query)
-        # Fallback: Just take the first few meaningful words from the summary
-        words = [w for w in re.findall(r'\b[A-Za-z0-9]+\b', cleaned_query) if len(w) > 3]
-        return " ".join(words[:4]).strip()
+            for kw in keywords:
+                kw_clean = kw.strip()
+                if kw_clean and kw_clean not in candidates:
+                    candidates.append(kw_clean)
+
+        # Take top 6 terms — enough for NewsAPI without over-constraining
+        selected = candidates[:6]
+
+        if selected:
+            return ' '.join(selected)
+
+        # Last resort: first 5 words of query
+        return ' '.join(query.split()[:5])
     
     def _extract_key_phrases(self, text: str) -> str:
         """Extract key phrases from text, removing filler words and focusing on important content"""

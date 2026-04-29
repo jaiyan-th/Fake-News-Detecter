@@ -79,6 +79,7 @@ def create_app():
             from models.user_analysis import UserAnalysis
             from models.knowledge import KnowledgeArticle
             from models.database import AnalysisCache
+            from models.rag_analysis_log import RAGAnalysisLog, RAGMetrics
             db.create_all()
             print("[OK] Database tables created/verified")
         except Exception as e:
@@ -247,9 +248,11 @@ def create_app():
     from routes.analyze import analyze_bp
     from routes.auth import auth_bp
     from routes.history import history_bp
+    from routes.rag_analyze import rag_analyze_bp
     app.register_blueprint(analyze_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(history_bp)
+    app.register_blueprint(rag_analyze_bp)
     
     return app
 

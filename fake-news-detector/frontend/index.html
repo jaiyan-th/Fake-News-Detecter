@@ -230,6 +230,12 @@
                             <label class="form-label">Text to Analyze</label>
                             <textarea id="claim-text" placeholder="Paste the claim or news excerpt here to detect semantic bias and factual inconsistencies..."></textarea>
                         </div>
+                        <div class="rag-toggle-row" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                            <label class="rag-toggle-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text-muted);">
+                                <input type="checkbox" id="rag-toggle-text" style="accent-color:#f97316;width:16px;height:16px;">
+                                Use RAG Pipeline <span style="background:rgba(249,115,22,.15);color:#f97316;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:700;margin-left:4px;">11-Step</span>
+                            </label>
+                        </div>
                         <button class="btn btn-primary w-full" id="btn-verify-text">Verify Text</button>
                     </div>
 
@@ -237,6 +243,12 @@
                         <div class="input-group">
                             <label class="form-label">Article URL</label>
                             <input type="url" id="news-url" placeholder="https://news-source.com/article-to-verify">
+                        </div>
+                        <div class="rag-toggle-row" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                            <label class="rag-toggle-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text-muted);">
+                                <input type="checkbox" id="rag-toggle-url" style="accent-color:#f97316;width:16px;height:16px;">
+                                Use RAG Pipeline <span style="background:rgba(249,115,22,.15);color:#f97316;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:700;margin-left:4px;">11-Step</span>
+                            </label>
                         </div>
                         <button class="btn btn-primary w-full" id="btn-verify-url">Verify URL</button>
                     </div>
@@ -246,12 +258,25 @@
             <!-- Loading State -->
             <div id="loading-indicator" class="hidden card">
                 <div class="spinner"></div>
-                <div class="loading-text text-center mb-6">Analyzing through Neural Verification Engine...</div>
-                <div class="pipeline-progress">
+                <div class="loading-text text-center mb-6" id="loading-text">Analyzing through Neural Verification Engine...</div>
+                <div class="pipeline-progress" id="pipeline-progress-standard">
                     <div class="step active">Input Processing</div>
                     <div class="step">Fact Retrieval</div>
                     <div class="step">Semantics</div>
                     <div class="step">Credibility</div>
+                </div>
+                <div class="pipeline-progress hidden" id="pipeline-progress-rag" style="flex-wrap:wrap;gap:6px;">
+                    <div class="step active">1. Input</div>
+                    <div class="step">2. News API</div>
+                    <div class="step">3. Vector DB</div>
+                    <div class="step">4. Merge</div>
+                    <div class="step">5. Re-rank</div>
+                    <div class="step">6. Evidence</div>
+                    <div class="step">7. Gap</div>
+                    <div class="step">8. Reasoning</div>
+                    <div class="step">9. Confidence</div>
+                    <div class="step">10. Verdict</div>
+                    <div class="step">11. Output</div>
                 </div>
             </div>
 

@@ -1923,3 +1923,209 @@ tbody tr:hover {
         padding: 1.5rem;
     }
 }
+
+
+/* ============================================================
+   RAG PIPELINE PANEL  (Steps 5-13 display)
+   ============================================================ */
+
+.rag-panel-root {
+    background: var(--bg-dark, #1e293b);
+    border: 1px solid #334155;
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-top: 16px;
+    color: var(--text-dark, #f1f5f9);
+}
+
+/* Header row */
+.rag-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+.rag-panel-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+}
+.rag-gap-badge {
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+}
+
+/* Trace ID */
+.rag-trace-id {
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 12px;
+}
+.rag-trace-id code {
+    font-family: monospace;
+    background: rgba(255,255,255,.06);
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+/* Claim box */
+.rag-claim-box {
+    background: rgba(249,115,22,.08);
+    border-left: 3px solid #f97316;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Section labels */
+.rag-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+/* Evidence sections */
+.rag-ev-section {
+    margin-bottom: 16px;
+}
+.rag-ev-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #334155;
+}
+.rag-ev-row:last-child { border-bottom: none; }
+
+.rag-stance-badge {
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+.rag-ev-body { flex: 1; min-width: 0; }
+.rag-ev-title {
+    font-weight: 600;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.rag-ev-meta {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+.rag-ev-summary {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 4px;
+    line-height: 1.5;
+}
+.rag-ev-link {
+    color: #f97316;
+    font-size: 12px;
+    text-decoration: none;
+    margin-left: 6px;
+}
+.rag-ev-link:hover { text-decoration: underline; }
+
+/* Reasoning box */
+.rag-reasoning-box {
+    background: rgba(148,163,184,.08);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+/* ── Metrics panel ── */
+.rag-metrics-section {
+    border-top: 1px solid #334155;
+    padding-top: 16px;
+    margin-top: 4px;
+}
+.rag-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+}
+@media (max-width: 600px) {
+    .rag-metrics-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.rag-metric-card {
+    background: rgba(255,255,255,.04);
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 10px 12px;
+    text-align: center;
+}
+.rag-metric-value {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.rag-metric-label {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 3px;
+}
+
+/* Confidence breakdown bars */
+.rag-conf-breakdown { margin-bottom: 10px; }
+.rag-metric-comp-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+.rag-metric-comp-key {
+    width: 120px;
+    flex-shrink: 0;
+    color: #94a3b8;
+    text-transform: capitalize;
+}
+.rag-metric-bar-wrap {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,.08);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.rag-metric-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width .4s ease;
+}
+.rag-metric-comp-val {
+    width: 40px;
+    text-align: right;
+    color: #f1f5f9;
+    font-weight: 600;
+}
+
+/* Latency detail row */
+.rag-latency-detail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 8px;
+}

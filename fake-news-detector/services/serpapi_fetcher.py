@@ -5,6 +5,7 @@ SerpAPI Google News fetcher for comprehensive news coverage
 from typing import List, Dict
 import requests
 import time
+import re
 from services.extractor import ArticleContent
 
 class SerpAPIFetcher:
@@ -64,44 +65,83 @@ class SerpAPIFetcher:
             return []
     
     def _build_search_query(self, query: str, keywords: List[str] = None) -> str:
-        """Build optimized search query"""
-        if keywords and len(keywords) > 0:
-            # Use top 3-4 keywords
-            return " ".join(keywords[:4])
-        
-        # Extract key words from query
-        words = query.split()[:5]
-        return " ".join(words)
+        """
+        Build optimized search query for Google News.
+        Uses the full normalized claim (up to 10 words) for best results,
+        supplemented by top keywords.
+        """
+        # Clean the query — remove filler but keep proper nouns and key terms
+        clean = re.sub(r'\s+', ' ', query).strip()
+
+        # If we have a rich query (sentence), extract the most important words
+        words = clean.split()
+        stop = {'the','a','an','and','or','but','in','on','at','to','for',
+                'of','is','was','are','were','be','been','that','this',
+                'with','from','by','as','it','its','will','has','have'}
+
+        # Keep proper nouns and meaningful words, up to 8 terms
+        key_words = [w for w in words if w.lower() not in stop and len(w) > 2][:8]
+
+        if key_words:
+            return ' '.join(key_words)
+
+        # Fallback to provided keywords
+        if keywords:
+            return ' '.join(keywords[:6])
+
+        return ' '.join(words[:6])
     
     def _convert_to_article_content(self, item: Dict) -> ArticleContent:
-        """Convert SerpAPI result to ArticleContent"""
+        """Convert SerpAPI result to ArticleContent."""
         try:
-            title = item.get('title', '')
-            snippet = item.get('snippet', '')
-            link = item.get('link', '')
-            source = item.get('source', {}).get('name', 'Unknown')
-            date = item.get('date', '')
-            
+            title   = item.get('title', '').strip()
+            link    = item.get('link', '').strip()
+            source_info = item.get('source', {})
+            source  = (source_info.get('name') or
+                       source_info.get('title') or 'Unknown').strip()
+            date    = item.get('date', '')
+
             if not title or not link:
                 return None
-            
-            # Combine snippet and any additional text
-            content = snippet
-            if 'stories' in item:
-                # Add related stories content
-                for story in item['stories'][:2]:
-                    story_snippet = story.get('snippet', '')
-                    if story_snippet:
-                        content += f" {story_snippet}"
-            
+
+            # Build content from all available text fields
+            parts = []
+
+            # snippet (sometimes present)
+            snippet = item.get('snippet', '').strip()
+            if snippet:
+                parts.append(snippet)
+
+            # description (alternate field)
+            desc = item.get('description', '').strip()
+            if desc and desc != snippet:
+                parts.append(desc)
+
+            # related stories snippets
+            for story in item.get('stories', [])[:3]:
+                s = story.get('snippet', '').strip()
+                if s:
+                    parts.append(s)
+                t = story.get('title', '').strip()
+                if t and t != title:
+                    parts.append(t)
+
+            # highlights
+            for h in item.get('highlights', [])[:2]:
+                if isinstance(h, str):
+                    parts.append(h)
+
+            # If still empty, use the title itself as content
+            # (enough for keyword overlap and stance detection)
+            content = ' '.join(parts).strip() if parts else title
+
             return ArticleContent(
                 title=title,
                 content=content,
                 url=link,
                 source=source,
-                published_date=date
+                published_date=date,
             )
-            
         except Exception as e:
-            print(f"Error converting SerpAPI item: {str(e)}")
+            print(f"Error converting SerpAPI item: {e}")
             return None

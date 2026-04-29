@@ -411,11 +411,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!requireAuth()) return;
         
         const text = document.getElementById('claim-text').value;
-        
         if (!text) return alert('Please enter some text.');
-        
-        dashboard.showLoading();
-        const res = await api.analyzeText(text);
+
+        const useRag = document.getElementById('rag-toggle-text')?.checked;
+        dashboard.showLoading(useRag);
+
+        const res = useRag
+            ? await api.ragAnalyzeText(text)
+            : await api.analyzeText(text);
         dashboard.renderResult(res);
     });
 
@@ -423,11 +426,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!requireAuth()) return;
         
         const url = document.getElementById('news-url').value;
-        
         if (!url) return alert('Please enter a valid URL.');
-        
-        dashboard.showLoading();
-        const res = await api.analyzeUrl(url);
+
+        const useRag = document.getElementById('rag-toggle-url')?.checked;
+        dashboard.showLoading(useRag);
+
+        const res = useRag
+            ? await api.ragAnalyzeUrl(url)
+            : await api.analyzeUrl(url);
         dashboard.renderResult(res);
     });
 

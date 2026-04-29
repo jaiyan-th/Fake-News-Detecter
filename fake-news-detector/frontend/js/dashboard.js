@@ -5,9 +5,27 @@ class Dashboard {
         this.steps = document.querySelectorAll('.pipeline-progress .step');
     }
 
-    showLoading() {
+    showLoading(useRag = false) {
         this.resultsPanel.classList.add('hidden');
         this.loadingIndicator.classList.remove('hidden');
+
+        // Swap progress bars
+        const standardBar = document.getElementById('pipeline-progress-standard');
+        const ragBar      = document.getElementById('pipeline-progress-rag');
+        const loadingText = document.getElementById('loading-text');
+
+        if (useRag) {
+            standardBar?.classList.add('hidden');
+            ragBar?.classList.remove('hidden');
+            if (loadingText) loadingText.textContent = 'Running 11-Step RAG Pipeline...';
+            this.steps = ragBar ? ragBar.querySelectorAll('.step') : this.steps;
+        } else {
+            ragBar?.classList.add('hidden');
+            standardBar?.classList.remove('hidden');
+            if (loadingText) loadingText.textContent = 'Analyzing through Neural Verification Engine...';
+            this.steps = standardBar ? standardBar.querySelectorAll('.step') : this.steps;
+        }
+
         this.resetSteps();
 
         let currentStep = 0;
@@ -17,7 +35,7 @@ class Dashboard {
                 this.steps[currentStep].classList.add('active');
                 currentStep++;
             }
-        }, 800);
+        }, useRag ? 600 : 800);
     }
 
     hideLoading() {
@@ -36,7 +54,6 @@ class Dashboard {
         this.hideLoading();
         this.resultsPanel.classList.remove('hidden');
 
-        // Check if data exists and has required fields
         if (!data || typeof data !== 'object') {
             this.renderError('Invalid response data received from server');
             return;
@@ -47,7 +64,6 @@ class Dashboard {
             return;
         }
 
-        // Validate required fields
         if (!data.prediction || data.confidence === undefined) {
             this.renderError('Incomplete analysis data received from server');
             return;
@@ -57,18 +73,15 @@ class Dashboard {
         verdictBanner.className = 'verdict-banner ' + data.prediction.toLowerCase();
 
         document.getElementById('prediction-text').textContent = data.prediction;
-        
-        // Handle confidence display
-        const confidencePercent = typeof data.confidence === 'number' 
-            ? Math.round(data.confidence * 100) 
+
+        const confidencePercent = typeof data.confidence === 'number'
+            ? Math.round(data.confidence * 100)
             : parseInt(data.confidence) || 0;
         document.getElementById('confidence-score').textContent = confidencePercent + '%';
-        
-        // Show Multi-Model AI badge
-        document.getElementById('domain-badge').textContent = 'Multi-Model AI';
+
+        document.getElementById('domain-badge').textContent = data.isRag ? 'RAG Pipeline' : 'Multi-Model AI';
         document.getElementById('explanation-text').textContent = data.explanation || 'No explanation available';
 
-        // Only show LLM analysis for URL analysis
         this.renderLlmAnalysis(data.llm_analysis, data.input_type);
 
         const warningsList = document.getElementById('warnings-list');
@@ -87,23 +100,45 @@ class Dashboard {
             data.verified_sources.forEach(source => {
                 const div = document.createElement('div');
                 div.className = 'source-item';
-                
-                // Handle different source formats
+
                 const sourceTitle = source.title || source.article_title || 'Untitled';
                 const sourceUrl = source.url || source.article_url || '#';
                 const sourceName = source.source || 'Unknown Source';
                 const similarity = source.similarity || '';
-                const isTrusted = source.is_trusted ? ' (Trusted)' : '';
-                
+                const isTrusted = source.is_trusted ? ' ✓' : '';
+
+                // Stance badge (RAG-specific)
+                let stanceBadge = '';
+                if (source.stance) {
+                    const stanceColor = source.stance === 'support'
+                        ? '#22c55e' : source.stance === 'contradict'
+                        ? '#ef4444' : '#94a3b8';
+                    stanceBadge = `<span style="
+                        display:inline-block; padding:1px 7px; border-radius:10px;
+                        font-size:11px; font-weight:600; color:#fff;
+                        background:${stanceColor}; margin-left:6px; text-transform:uppercase;">
+                        ${source.stance}
+                    </span>`;
+                }
+
                 div.innerHTML = `
-                    <strong>${sourceName}${isTrusted} ${similarity}</strong>
+                    <strong>${sourceName}${isTrusted}${stanceBadge}
+                        <span style="font-weight:400; color:var(--text-muted); font-size:12px; margin-left:6px;">${similarity}</span>
+                    </strong>
                     <p>${sourceTitle}</p>
-                    <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">View Source</a>
+                    ${sourceUrl !== '#' ? `<a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">View Source</a>` : ''}
                 `;
                 sourcesList.appendChild(div);
             });
         } else {
             sourcesList.innerHTML = '<p>No reliable sources found for this claim.</p>';
+        }
+
+        // Render RAG-specific evidence panel if present
+        if (data.isRag && data.rag) {
+            this.renderRagPanel(data.rag, data.metrics, data.request_id);
+        } else {
+            this._hideRagPanel();
         }
     }
 
@@ -174,6 +209,201 @@ class Dashboard {
         document.getElementById('warnings-list').innerHTML = '';
         document.getElementById('sources-list').innerHTML = '';
         this.renderLlmAnalysis(null, null);
+        this._hideRagPanel();
+    }
+
+    // ── RAG Evidence Panel ──────────────────────────────────────────────────
+
+    /**
+     * Render the full RAG evidence + metrics panel (STEP 13).
+     * Creates or updates #rag-panel inside #results-panel.
+     */
+    renderRagPanel(rag, metrics, requestId) {
+        let panel = document.getElementById('rag-panel');
+        if (!panel) {
+            panel = document.createElement('div');
+            panel.id = 'rag-panel';
+            panel.className = 'rag-panel-root';
+            const resultsPanel = document.getElementById('results-panel');
+            if (resultsPanel) resultsPanel.appendChild(panel);
+        }
+
+        const gapColors = {
+            'Fully Supported':    '#22c55e',
+            'Partially Supported':'#f59e0b',
+            'Unsupported':        '#94a3b8',
+            'Contradicted':       '#ef4444',
+        };
+        const gapColor = gapColors[rag.gap_analysis] || '#94a3b8';
+
+        // ── Evidence rows ──
+        const newsRows = (rag.news_api_evidence || []).map(ev => {
+            const sc = ev.stance === 'support' ? '#22c55e'
+                     : ev.stance === 'contradict' ? '#ef4444' : '#94a3b8';
+            const link = ev.url
+                ? `<a href="${ev.url}" target="_blank" rel="noopener noreferrer"
+                      class="rag-ev-link">View ↗</a>` : '';
+            return `<div class="rag-ev-row">
+                <span class="rag-stance-badge" style="background:${sc}">${ev.stance||'neutral'}</span>
+                <div class="rag-ev-body">
+                    <div class="rag-ev-title">${ev.title||'—'}</div>
+                    <div class="rag-ev-meta">${ev.source||''} · sim ${ev.similarity||'—'} ${link}</div>
+                    ${ev.summary ? `<div class="rag-ev-summary">${ev.summary}</div>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+
+        const ragRows = (rag.rag_evidence || []).map(ev => {
+            const sc = ev.stance === 'support' ? '#22c55e'
+                     : ev.stance === 'contradict' ? '#ef4444' : '#94a3b8';
+            return `<div class="rag-ev-row">
+                <span class="rag-stance-badge" style="background:${sc}">${ev.stance||'neutral'}</span>
+                <div class="rag-ev-body">
+                    <div class="rag-ev-title">${ev.content||'—'}</div>
+                    <div class="rag-ev-meta">${ev.source||''} · sim ${ev.similarity||'—'}</div>
+                </div>
+            </div>`;
+        }).join('');
+
+        // ── Metrics panel (STEP 13) ──
+        let metricsHtml = '';
+        if (metrics) {
+            const latColor  = metrics.latency_ms < 8000 ? '#22c55e'
+                            : metrics.latency_ms < 15000 ? '#f59e0b' : '#ef4444';
+            const accPct    = Math.round((metrics.retrieval_accuracy || 0) * 100);
+            const accColor  = accPct >= 60 ? '#22c55e' : accPct >= 40 ? '#f59e0b' : '#ef4444';
+            const covColor  = (metrics.evidence_coverage || 0) >= 2 ? '#22c55e'
+                            : (metrics.evidence_coverage || 0) >= 1 ? '#f59e0b' : '#94a3b8';
+
+            const compRows = metrics.confidence_components
+                ? Object.entries(metrics.confidence_components).map(([k, v]) =>
+                    `<div class="rag-metric-comp-row">
+                        <span class="rag-metric-comp-key">${k.replace(/_/g,' ')}</span>
+                        <div class="rag-metric-bar-wrap">
+                            <div class="rag-metric-bar-fill"
+                                 style="width:${Math.round(v*100)}%;background:#f97316"></div>
+                        </div>
+                        <span class="rag-metric-comp-val">${(v*100).toFixed(1)}%</span>
+                    </div>`).join('')
+                : '';
+
+            metricsHtml = `
+            <div class="rag-metrics-section">
+                <div class="rag-section-label">📊 Pipeline Metrics (STEP 10)</div>
+                <div class="rag-metrics-grid">
+                    <div class="rag-metric-card">
+                        <div class="rag-metric-value" style="color:${latColor}">
+                            ${metrics.latency_ms < 1000
+                                ? metrics.latency_ms.toFixed(0)+'ms'
+                                : (metrics.latency_ms/1000).toFixed(1)+'s'}
+                        </div>
+                        <div class="rag-metric-label">Response Time</div>
+                    </div>
+                    <div class="rag-metric-card">
+                        <div class="rag-metric-value" style="color:${accColor}">${accPct}%</div>
+                        <div class="rag-metric-label">Retrieval Quality</div>
+                    </div>
+                    <div class="rag-metric-card">
+                        <div class="rag-metric-value" style="color:${covColor}">
+                            ${metrics.evidence_coverage || 0}
+                        </div>
+                        <div class="rag-metric-label">Evidence Strength</div>
+                    </div>
+                    <div class="rag-metric-card">
+                        <div class="rag-metric-value" style="color:#f97316">
+                            ${(metrics.confidence_score||0).toFixed(1)}%
+                        </div>
+                        <div class="rag-metric-label">Confidence Score</div>
+                    </div>
+                </div>
+                ${compRows ? `
+                <div class="rag-conf-breakdown">
+                    <div class="rag-section-label" style="margin-top:12px;margin-bottom:8px;">
+                        Confidence Breakdown
+                    </div>
+                    ${compRows}
+                </div>` : ''}
+                <div class="rag-latency-detail">
+                    <span>News API: ${(metrics.news_api_latency_ms||0).toFixed(0)}ms</span>
+                    <span>Vector DB: ${(metrics.rag_db_latency_ms||0).toFixed(0)}ms</span>
+                    <span>Re-rank: ${(metrics.rerank_latency_ms||0).toFixed(0)}ms</span>
+                    <span>LLM: ${(metrics.llm_latency_ms||0).toFixed(0)}ms</span>
+                </div>
+            </div>`;
+        }
+
+        // ── Request ID trace ──
+        const traceHtml = requestId
+            ? `<div class="rag-trace-id">🔍 Request ID: <code>${requestId}</code></div>`
+            : '';
+
+        panel.innerHTML = `
+            <div class="rag-panel-header">
+                <h3 class="rag-panel-title">🔬 RAG Pipeline Evidence</h3>
+                <span class="rag-gap-badge" style="background:${gapColor}">
+                    ${rag.gap_analysis || 'Unknown'}
+                </span>
+            </div>
+
+            ${traceHtml}
+
+            ${rag.claim_summary ? `
+            <div class="rag-claim-box">
+                <strong>Claim:</strong> ${rag.claim_summary}
+            </div>` : ''}
+
+            ${(rag.expanded_queries && rag.expanded_queries.length > 0) ? `
+            <div class="rag-ev-section" style="margin-bottom:14px;">
+                <div class="rag-section-label">🔍 Expanded Queries (STEP 2)</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
+                    ${rag.expanded_queries.map(q =>
+                        `<span style="background:rgba(249,115,22,.1);color:#f97316;
+                            padding:2px 10px;border-radius:12px;font-size:11px;
+                            border:1px solid rgba(249,115,22,.25);">${q}</span>`
+                    ).join('')}
+                </div>
+            </div>` : ''}
+
+            ${rag.retrieval_stats && rag.retrieval_stats.total_results !== undefined ? `
+            <div class="rag-ev-section" style="margin-bottom:14px;">
+                <div class="rag-section-label">📡 Retrieval Stats (STEP 3)</div>
+                <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;font-size:12px;color:var(--text-muted,#94a3b8);">
+                    <span>Total: <strong style="color:#f1f5f9">${rag.retrieval_stats.total_results}</strong></span>
+                    <span>News API: <strong style="color:#f1f5f9">${rag.retrieval_stats.news_api_results || 0}</strong></span>
+                    <span>RAG DB: <strong style="color:#f1f5f9">${rag.retrieval_stats.rag_results || 0}</strong></span>
+                    <span>Sources: <strong style="color:#f1f5f9">${(rag.retrieval_stats.used_sources || []).join(', ')}</strong></span>
+                </div>
+            </div>` : ''}
+
+            ${newsRows ? `
+            <div class="rag-ev-section">
+                <div class="rag-section-label">
+                    🌐 News API Evidence (${(rag.news_api_evidence||[]).length})
+                </div>
+                ${newsRows}
+            </div>` : ''}
+
+            ${ragRows ? `
+            <div class="rag-ev-section">
+                <div class="rag-section-label">
+                    📚 Historical Knowledge Base (${(rag.rag_evidence||[]).length})
+                </div>
+                ${ragRows}
+            </div>` : ''}
+
+            ${rag.reasoning ? `
+            <div class="rag-reasoning-box">
+                <div class="rag-section-label" style="margin-bottom:6px;">💭 Grounded Reasoning</div>
+                ${rag.reasoning}
+            </div>` : ''}
+
+            ${metricsHtml}
+        `;
+    }
+
+    _hideRagPanel() {
+        const panel = document.getElementById('rag-panel');
+        if (panel) panel.remove();
     }
 
     renderHistory(historyArray) {
