@@ -24,10 +24,8 @@ psycopg2-binary>=2.9.9
 pgvector>=0.2.5
 
 # Additional ML/Data Science
-pandas>=1.1
 numpy>=1.19
 scikit-learn>=1.0
-scipy>=1.7
 
 # Production server
 gunicorn>=20.1.0

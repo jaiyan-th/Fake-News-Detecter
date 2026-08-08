@@ -24,17 +24,17 @@ class ArticleSummarizer:
     ]
     
     def __init__(self, api_key: str, timeout: int = 15, max_retries: int = 3):
-        if not api_key:
-            raise ValueError("Groq API key is required")
-        
-        # Initialize Groq client
-        try:
-            self.client = Groq(api_key=api_key)
-            logger.info("Groq client initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize Groq client: {e}")
-            raise ValueError(f"Groq client initialization failed: {str(e)}")
-        
+        # Initialize Groq client (allow missing key - degrades gracefully)
+        self.client = None
+        if api_key:
+            try:
+                self.client = Groq(api_key=api_key)
+                logger.info("Groq client initialized successfully")
+            except Exception as e:
+                logger.error(f"Failed to initialize Groq client: {e}")
+        else:
+            logger.warning("GROQ_API_KEY not set - LLM summarization disabled, will use fallback")
+
         self.timeout = timeout
         self.max_retries = max_retries
         self.current_model_index = 0
@@ -106,13 +106,18 @@ Article:
         all_summaries = []
         all_claims = []
         successful_models = []
-        
+
+        # If client not configured, return simple fallback
+        if self.client is None:
+            fallback_summary = content[:500] + '...' if len(content) > 500 else content
+            return fallback_summary, ['No Groq API key configured - analysis limited']
+
         logger.info("Starting ensemble analysis with all models...")
-        
+
         for model in self.MODELS:
             try:
                 logger.info(f"Querying {model}...")
-                
+
                 response = self.client.chat.completions.create(
                     model=model,
                     messages=[

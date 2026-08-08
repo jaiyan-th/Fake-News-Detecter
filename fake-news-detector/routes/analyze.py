@@ -160,69 +160,51 @@ def get_services():
         try:
             # Validate configuration
             Config.validate_config()
-            
-            # Initialize database and cache with error handling
-            try:
-                database = Database(Config.DATABASE_PATH)
-                cache_service = CacheService(database)
-            except Exception as e:
-                raise RuntimeError(f"Database initialization failed: {str(e)}")
-            
-            # Initialize content extraction with error handling
-            try:
-                content_extractor = ContentExtractor(timeout=Config.REQUEST_TIMEOUT)
-            except Exception as e:
-                raise RuntimeError(f"Content extractor initialization failed: {str(e)}")
-            
-            # Initialize LLM services with error handling
-            try:
-                article_summarizer = ArticleSummarizer(
-                    api_key=Config.GROQ_API_KEY,
-                    timeout=Config.REQUEST_TIMEOUT
-                )
-            except Exception as e:
-                raise RuntimeError(f"Article summarizer initialization failed: {str(e)}")
-            
-            # Initialize keyword extractor with error handling
-            try:
-                keyword_extractor = KeywordExtractor(api_key=Config.GROQ_API_KEY)
-            except Exception as e:
-                raise RuntimeError(f"Keyword extractor initialization failed: {str(e)}")
-            
-            # Initialize news fetching with error handling
-            try:
-                news_fetcher = NewsFetcher(
-                    api_key=Config.NEWS_API_KEY,
-                    limit=Config.NEWS_API_LIMIT,
-                    serpapi_key=Config.SERPAPI_KEY  # Add SerpAPI support
-                )
-            except Exception as e:
-                raise RuntimeError(f"News fetcher initialization failed: {str(e)}")
-            
-            # Initialize similarity engine with error handling
+
+            # Initialize database and cache
+            database = Database(Config.DATABASE_PATH)
+            cache_service = CacheService(database)
+
+            # Initialize content extraction
+            content_extractor = ContentExtractor(timeout=Config.REQUEST_TIMEOUT)
+
+            # Initialize LLM services (gracefully degrade if API key missing)
+            article_summarizer = ArticleSummarizer(
+                api_key=Config.GROQ_API_KEY,
+                timeout=Config.REQUEST_TIMEOUT
+            )
+
+            # Initialize keyword extractor
+            keyword_extractor = KeywordExtractor(api_key=Config.GROQ_API_KEY)
+
+            # Initialize news fetching (gracefully degrade if API key missing)
+            news_fetcher = NewsFetcher(
+                api_key=Config.NEWS_API_KEY,
+                limit=Config.NEWS_API_LIMIT,
+                serpapi_key=Config.SERPAPI_KEY
+            )
+
+            # Initialize similarity engine
             try:
                 similarity_engine = SimilarityEngine(model_name=Config.EMBEDDING_MODEL)
             except Exception as e:
-                raise RuntimeError(f"Similarity engine initialization failed: {str(e)}")
-            
-            # Initialize decision engine with error handling
-            try:
-                decision_engine = DecisionEngine(groq_api_key=Config.GROQ_API_KEY)
-            except Exception as e:
-                raise RuntimeError(f"Decision engine initialization failed: {str(e)}")
-            
-            # Initialize language detector with error handling
-            try:
-                language_detector = LanguageDetector()
-            except Exception as e:
-                raise RuntimeError(f"Language detector initialization failed: {str(e)}")
-            
-            # Initialize pattern detector with error handling
-            try:
-                pattern_detector = PatternDetector()
-            except Exception as e:
-                raise RuntimeError(f"Pattern detector initialization failed: {str(e)}")
-            
+                print(f"[WARNING] Similarity engine init warning: {e}")
+                similarity_engine = SimilarityEngine.__new__(SimilarityEngine)
+                similarity_engine.model = None
+                similarity_engine._load_attempted = True
+                similarity_engine.model_name = Config.EMBEDDING_MODEL
+                similarity_engine.embedding_cache = {}
+                similarity_engine.trusted_sources = set()
+
+            # Initialize decision engine
+            decision_engine = DecisionEngine(groq_api_key=Config.GROQ_API_KEY)
+
+            # Initialize language detector
+            language_detector = LanguageDetector()
+
+            # Initialize pattern detector
+            pattern_detector = PatternDetector()
+
             _services.update({
                 'cache': cache_service,
                 'extractor': content_extractor,
@@ -234,12 +216,11 @@ def get_services():
                 'language_detector': language_detector,
                 'pattern_detector': pattern_detector
             })
-            
+
         except Exception as e:
-            # Log service initialization failure
             error_handler.logger.critical(f"Service initialization failed: {str(e)}")
             raise RuntimeError(f"Service initialization failed: {str(e)}")
-    
+
     return _services
 
 def save_to_user_history(input_type: str, input_content: str, verdict: str, 

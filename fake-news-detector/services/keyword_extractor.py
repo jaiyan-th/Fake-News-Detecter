@@ -11,10 +11,13 @@ class KeywordExtractor:
     """Service for extracting important keywords from articles using Mistral LLM"""
     
     def __init__(self, api_key: str):
-        if not api_key:
-            raise ValueError("Groq API key is required")
-        self.client = Groq(api_key=api_key)
-        self.model = "llama-3.1-8b-instant"  # Use same model as other services
+        self.client = None
+        if api_key:
+            self.client = Groq(api_key=api_key)
+        else:
+            import logging
+            logging.getLogger(__name__).warning("GROQ_API_KEY not set - keyword extraction disabled")
+        self.model = "llama-3.1-8b-instant"
     
     def extract_keywords(self, content: str) -> List[str]:
         """
@@ -24,7 +27,12 @@ class KeywordExtractor:
         """
         if not content or len(content.strip()) < 50:
             return []
-        
+
+        if self.client is None:
+            # Simple fallback: return first few significant words
+            words = [w for w in content.split() if len(w) > 4][:7]
+            return words
+
         try:
             # Use the exact prompt format from the blueprint
             prompt = f"""Extract 5–7 important keywords from this summary.

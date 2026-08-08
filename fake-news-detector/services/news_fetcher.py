@@ -13,9 +13,11 @@ class NewsFetcher:
     """Service for fetching related news articles from multiple sources with fallback"""
     
     def __init__(self, api_key: str, limit: int = 15, serpapi_key: str = None):
-        if not api_key:
-            raise ValueError("News API key is required")
+        import logging
+        self._logger = logging.getLogger(__name__)
         self.api_key = api_key
+        if not api_key:
+            self._logger.warning("NEWS_API_KEY not set - news fetching will return empty results")
         self.serpapi_key = serpapi_key
         self.limit = min(limit, 20)  # Cap at 20 for performance
         self.base_url = "https://newsapi.org/v2/everything"
