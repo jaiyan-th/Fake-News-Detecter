@@ -41,10 +41,13 @@ def create_app():
     # Authentication configuration
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', os.urandom(24).hex())
     app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_SECURE'] = not app.debug  # True in production
+    # On Render the app is served over HTTPS - detect this via env var
+    is_production = os.getenv('RENDER', '') != '' or os.getenv('FLASK_ENV', '') == 'production'
+    app.config['SESSION_COOKIE_SECURE'] = is_production
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
-    
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
     # Database configuration
     supabase_url = os.environ.get('SUPABASE_DB_URL')
     
@@ -53,15 +56,18 @@ def create_app():
         app.config['SQLALCHEMY_DATABASE_URI'] = supabase_url
         print(f"Database URI: Supabase PostgreSQL connected")
     else:
-        database_path = AppConfig.DATABASE_PATH
-        
-        # Ensure the path is absolute and properly formatted for SQLite URI
-        if not os.path.isabs(database_path):
-            database_path = os.path.abspath(database_path)
-        
-        # Convert Windows path to URI format (forward slashes)
-        database_path = database_path.replace('\\', '/')
-        
+        # On Linux containers (Render), use /tmp for writable SQLite storage
+        import platform
+        if platform.system() != 'Windows':
+            database_dir = '/tmp/fake_news_db'
+            os.makedirs(database_dir, exist_ok=True)
+            database_path = os.path.join(database_dir, 'news.db')
+        else:
+            database_path = AppConfig.DATABASE_PATH
+            if not os.path.isabs(database_path):
+                database_path = os.path.abspath(database_path)
+            database_path = database_path.replace('\\', '/')
+
         app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
         print(f"Database URI: sqlite:///{database_path}")
     
@@ -75,23 +81,42 @@ def create_app():
     # Create database tables (with error handling)
     with app.app_context():
         try:
+            # Register pgvector extension when using PostgreSQL
+            if supabase_url:
+                try:
+                    from sqlalchemy import text
+                    db.session.execute(text('CREATE EXTENSION IF NOT EXISTS vector'))
+                    db.session.commit()
+                    print('[OK] pgvector extension registered')
+                except Exception as ext_e:
+                    print(f'[INFO] pgvector extension note: {ext_e}')
+                    db.session.rollback()
+
             # Import models to ensure they're registered
             from models.user_analysis import UserAnalysis
             from models.knowledge import KnowledgeArticle
             from models.database import AnalysisCache
             from models.rag_analysis_log import RAGAnalysisLog, RAGMetrics
             db.create_all()
-            print("[OK] Database tables created/verified")
+            print('[OK] Database tables created/verified')
         except Exception as e:
-            print(f"[WARNING] Database initialization warning: {e}")
-            print("  Database will be created on first use")
+            print(f'[WARNING] Database initialization warning: {e}')
+            print('  Database will be created on first use')
     
     # Configure CORS with credentials support
-    CORS(app, 
-         origins=['http://localhost:3000', 'http://127.0.0.1:3000'],
+    render_url = os.getenv('RENDER_EXTERNAL_URL', '')
+    allowed_origins = [
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+    ]
+    if render_url:
+        allowed_origins.append(render_url)
+
+    CORS(app,
+         origins=allowed_origins + ['*'],  # Allow all origins in production
          methods=['GET', 'POST', 'OPTIONS'],
          allow_headers=['Content-Type', 'Authorization', 'X-API-Key'],
-         supports_credentials=True)  # Enable credentials for session cookies
+         supports_credentials=False)  # Must be False when origins='*'
     
     # Global error handlers
     @app.errorhandler(400)
