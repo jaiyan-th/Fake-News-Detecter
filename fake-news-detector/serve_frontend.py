@@ -5,6 +5,15 @@ Integrated server serving both frontend and backend
 
 import os
 import sys
+
+try:
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+    if hasattr(sys.stderr, 'reconfigure'):
+        sys.stderr.reconfigure(encoding='utf-8')
+except Exception:
+    pass
+
 from flask import send_from_directory
 
 # Add the current directory to Python path
@@ -73,4 +82,5 @@ if __name__ == '__main__':
     print("Press Ctrl+C to stop the server")
     print("=" * 60)
     
-    app.run(host='127.0.0.1', port=3000, debug=True)
+    port = int(os.environ.get('PORT', 3000))
+    app.run(host='0.0.0.0', port=port)

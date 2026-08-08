@@ -4,9 +4,9 @@ Semantic similarity engine using sentence transformers
 
 from typing import List, Dict
 import numpy as np
-from sentence_transformers import SentenceTransformer
 from dataclasses import dataclass
 from services.extractor import ArticleContent
+
 @dataclass
 class SimilarityScore:
     article_url: str
@@ -21,6 +21,7 @@ class SimilarityEngine:
     def __init__(self, model_name: str = 'all-MiniLM-L6-v2'):
         self.model_name = model_name
         self.model = None
+        self._load_attempted = False
         self.embedding_cache = {}
         self.trusted_sources = {
             'bbc', 'reuters', 'the hindu', 'ndtv', 'cnn', 'associated press',
@@ -30,8 +31,14 @@ class SimilarityEngine:
     
     def _load_model(self):
         """Lazy load the sentence transformer model"""
-        if self.model is None:
-            self.model = SentenceTransformer(self.model_name)
+        if self.model is None and not self._load_attempted:
+            self._load_attempted = True
+            try:
+                from sentence_transformers import SentenceTransformer
+                self.model = SentenceTransformer(self.model_name)
+            except Exception as e:
+                print(f"[WARNING] Could not load SentenceTransformer ({e}). Vector embeddings will use fallback.")
+                self.model = None
     
     def generate_embedding(self, text: str) -> np.ndarray:
         """Generate text embedding with caching"""
@@ -42,6 +49,10 @@ class SimilarityEngine:
             return self.embedding_cache[cache_key]
         
         self._load_model()
+        
+        if self.model is None:
+            # Fallback zero vector when SentenceTransformer is unavailable
+            return np.zeros(384, dtype=np.float32)
         
         # Generate embedding
         embedding = self.model.encode(text, convert_to_tensor=False)
