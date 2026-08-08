@@ -16,6 +16,7 @@ sentence-transformers>=2.7.0
 # Web scraping and HTTP
 requests==2.31.0
 newspaper3k==0.2.8
+lxml_html_clean
 beautifulsoup4==4.12.2
 
 # Database & Vector Support

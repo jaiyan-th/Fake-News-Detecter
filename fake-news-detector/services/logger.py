@@ -20,33 +20,29 @@ class PerformanceLogger:
         
     def setup_logging(self, log_level: str):
         """Set up logging configuration"""
-        # Create logs directory if it doesn't exist
-        log_dir = Path("logs")
-        log_dir.mkdir(exist_ok=True)
-        
-        # Configure logging
         log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         
-        # Set up file handler
-        file_handler = logging.FileHandler(log_dir / self.log_file)
-        file_handler.setLevel(getattr(logging, log_level.upper()))
-        file_handler.setFormatter(logging.Formatter(log_format))
+        # Configure logger
+        self.logger = logging.getLogger('fake_news_detector')
+        self.logger.setLevel(getattr(logging, log_level.upper()))
+        self.logger.handlers.clear()
         
         # Set up console handler
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.INFO)
         console_handler.setFormatter(logging.Formatter(log_format))
-        
-        # Configure logger
-        self.logger = logging.getLogger('fake_news_detector')
-        self.logger.setLevel(getattr(logging, log_level.upper()))
-        
-        # Clear existing handlers to avoid duplicates
-        self.logger.handlers.clear()
-        
-        # Add handlers
-        self.logger.addHandler(file_handler)
         self.logger.addHandler(console_handler)
+        
+        # Set up file handler if possible
+        try:
+            log_dir = Path("logs")
+            log_dir.mkdir(exist_ok=True)
+            file_handler = logging.FileHandler(log_dir / self.log_file)
+            file_handler.setLevel(getattr(logging, log_level.upper()))
+            file_handler.setFormatter(logging.Formatter(log_format))
+            self.logger.addHandler(file_handler)
+        except Exception as e:
+            print(f"[WARNING] Could not initialize file logger: {e}")
         
         # Prevent propagation to root logger
         self.logger.propagate = False

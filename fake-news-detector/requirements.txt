@@ -16,10 +16,12 @@ sentence-transformers>=2.7.0
 # Web scraping and HTTP
 requests==2.31.0
 newspaper3k==0.2.8
-
-# Additional utilities
+lxml_html_clean
 beautifulsoup4==4.12.2
 
 # Database & Vector Support
 psycopg2-binary>=2.9.9
 pgvector>=0.2.5
+
+# Production server
+gunicorn>=20.1.0
