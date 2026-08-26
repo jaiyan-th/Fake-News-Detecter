@@ -9,6 +9,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fak
 
 from serve_frontend import app
 
+# Aliases for WSGI servers (Gunicorn looks for application or app)
+application = app
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 3000))
     app.run(host='0.0.0.0', port=port)
