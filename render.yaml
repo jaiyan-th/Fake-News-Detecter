@@ -2,10 +2,8 @@ services:
   - type: web
     name: Fake-News-Detecter
     env: python
-    buildCommand: pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 120 wsgi:app
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
-        value: 3.10.12
-      - key: FLASK_ENV
-        value: production
+        value: 3.11.8
