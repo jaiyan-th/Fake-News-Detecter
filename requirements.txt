@@ -1,9 +1,17 @@
 # FastAPI Core & Server
 fastapi>=0.110.0
 uvicorn[standard]>=0.29.0
+gunicorn>=21.2.0
+a2wsgi>=1.10.0
 pydantic>=2.0.0
 pydantic-settings>=2.0.0
 python-dotenv>=1.0.0
+
+# Database & Auth
+sqlalchemy>=2.0.0
+passlib[bcrypt]>=1.7.4
+bcrypt>=4.0.0
+pyjwt>=2.8.0
 
 # Async HTTP Client
 httpx>=0.27.0
