@@ -48,9 +48,11 @@ class VectorSearchService:
                 chunks.append(s_clean[:300])
         return chunks[:8]  # top 8 sentences per article to preserve memory and speed
 
-    def index_evidence(self, verification_id: str, articles: List[Dict[str, Any]]) -> int:
+    def index_evidence(self, verification_id: str, articles: List[Dict[str, Any]], query_text: str = "") -> int:
         """
-        Embed and index normalized articles with multi-chunk sentence embeddings for fine-grained retrieval.
+        Embed and index normalized articles with two-stage re-ranking:
+        1. Fast batch headline similarity re-ranking across ALL retrieved articles.
+        2. Sentence-level fine-grained chunk embedding for the top relevant newsrooms.
         """
         if not articles:
             return 0
@@ -59,12 +61,26 @@ class VectorSearchService:
         if verification_id not in self._store:
             self._store[verification_id] = []
 
-        # Select up to top 25 candidate articles prioritizing established newsrooms
-        def candidate_priority(a):
-            tier = a.get("credibility_tier", "")
-            return 1 if tier in ("WIRE_AND_PRIMARY_AGENCY", "ESTABLISHED_NEWS_ORGANIZATION", "INSTITUTIONAL_OFFICIAL") else 0
+        # If query_text is provided, semantically rank ALL articles first by headline relevance
+        if query_text and len(articles) > 1:
+            q_vec = np.array(self.embedding_service.embed_text(query_text), dtype=np.float32)
+            q_norm = np.linalg.norm(q_vec)
+            titles = [a.get("title", "") for a in articles]
+            title_embeddings = self.embedding_service.embed_batch(titles)
 
-        target_articles = sorted(articles, key=candidate_priority, reverse=True)[:25]
+            scored_candidates = []
+            for art, t_emb in zip(articles, title_embeddings):
+                t_arr = np.array(t_emb, dtype=np.float32)
+                t_norm = np.linalg.norm(t_arr)
+                sim = float(np.dot(q_vec, t_arr) / (q_norm * t_norm)) if (q_norm > 0 and t_norm > 0) else 0.0
+                tier = art.get("credibility_tier", "")
+                boost = 0.05 if tier in ("WIRE_AND_PRIMARY_AGENCY", "ESTABLISHED_NEWS_ORGANIZATION", "INSTITUTIONAL_OFFICIAL") else 0.0
+                scored_candidates.append((sim + boost, art))
+
+            scored_candidates.sort(key=lambda x: x[0], reverse=True)
+            target_articles = [item[1] for item in scored_candidates[:25]]
+        else:
+            target_articles = articles[:25]
 
         # Prepare all chunks to embed in a single batch
         all_texts_to_embed = []

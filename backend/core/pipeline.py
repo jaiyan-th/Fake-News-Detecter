@@ -165,7 +165,7 @@ class VerificationPipeline:
 
         # STAGE 6: Semantic Vector Indexing & Retrieval
         t0 = time.time()
-        self.vector_service.index_evidence(verification_id, normalized_articles)
+        self.vector_service.index_evidence(verification_id, normalized_articles, query_text=claim_info.primary_claim)
         retrieved_evidence = self.vector_service.retrieve_relevant_evidence(
             query_text=claim_info.primary_claim,
             verification_id=verification_id,
