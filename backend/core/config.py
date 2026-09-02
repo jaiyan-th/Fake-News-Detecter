@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     # Search & Retrieval Limits
     NEWS_API_LIMIT: int = 15
     SERPAPI_LIMIT: int = 15
-    REQUEST_TIMEOUT_SECONDS: int = 12
+    REQUEST_TIMEOUT_SECONDS: int = 6
     TOP_K_EVIDENCE: int = 6
     EVIDENCE_FRESHNESS_DAYS: int = 60  # Prioritize within this window for breaking news
 

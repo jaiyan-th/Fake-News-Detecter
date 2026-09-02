@@ -60,11 +60,13 @@ class VerificationPipeline:
         t0 = time.time()
         raw_text = ""
         article_title = ""
+        extracted_article = None
 
         if request.url:
             extracted = self.article_extractor.extract(request.url)
-            raw_text = extracted.content
-            article_title = extracted.title
+            extracted_article = extracted
+            raw_text = extracted.content.replace('\u202f', ' ').replace('\xa0', ' ')
+            article_title = extracted.title.replace('\u202f', ' ').replace('\xa0', ' ')
             stage_duration = round((time.time() - t0) * 1000, 2)
             pipeline_stages.append(PipelineStage(
                 stage="article_extraction",
@@ -73,7 +75,7 @@ class VerificationPipeline:
                 details={"url": request.url, "title": article_title, "chars": len(raw_text)}
             ))
         else:
-            raw_text = request.text.strip()
+            raw_text = request.text.strip().replace('\u202f', ' ').replace('\xa0', ' ')
             article_title = raw_text.split("\n")[0][:120]
             stage_duration = round((time.time() - t0) * 1000, 2)
             pipeline_stages.append(PipelineStage(
@@ -97,6 +99,12 @@ class VerificationPipeline:
         # STAGE 3: Search Query Generation (Groq)
         t0 = time.time()
         queries = self.query_generator.generate_queries(claim_info)
+        # Add focused newsroom query for verified outlets
+        search_queries = list(queries)
+        if claim_info.entities:
+            top_entity = claim_info.entities[0]
+            search_queries.append(f"{top_entity} The Hindu OR Times of India OR Indian Express")
+
         stage_duration = round((time.time() - t0) * 1000, 2)
         pipeline_stages.append(PipelineStage(
             stage="query_generation",
@@ -105,13 +113,27 @@ class VerificationPipeline:
             details={"generated_queries": queries}
         ))
 
-        # STAGE 4: Multi-Provider Concurrent Search (NewsAPI + SerpAPI)
+        # STAGE 4: Multi-Provider Concurrent Search (Google News + NewsAPI)
         t0 = time.time()
         raw_articles = []
 
+        # Include submitted article as verified reference document
+        if extracted_article and extracted_article.title and len(extracted_article.content) >= 30:
+            raw_articles.append({
+                "title": extracted_article.title,
+                "url": request.url,
+                "source_name": extracted_article.publisher or "Submitted Article",
+                "author": extracted_article.author,
+                "published_at": extracted_article.published_date,
+                "content": f"{extracted_article.title}. {extracted_article.content[:800]}",
+                "description": extracted_article.title,
+                "search_provider": "submitted_url",
+                "matched_query": "direct_input"
+            })
+
         import asyncio
-        newsapi_task = asyncio.create_task(self.newsapi_service.search(queries))
-        serpapi_task = asyncio.create_task(self.serpapi_service.search_google_news(queries))
+        newsapi_task = asyncio.create_task(self.newsapi_service.search(search_queries))
+        serpapi_task = asyncio.create_task(self.serpapi_service.search_google_news(search_queries))
 
         newsapi_res, serpapi_res = await asyncio.gather(newsapi_task, serpapi_task, return_exceptions=True)
 
