@@ -168,9 +168,9 @@ class VectorSearchService:
         # Sort by relevance score descending
         scored_articles.sort(key=lambda x: x["relevance_score"], reverse=True)
 
-        # Filter out completely irrelevant noise (similarity threshold < 0.20)
-        filtered = [a for a in scored_articles if a["raw_similarity"] >= 0.20]
-        results = filtered[:top_k] if filtered else scored_articles[:top_k]
+        # Filter out irrelevant noise (semantic similarity threshold >= 0.30)
+        filtered = [a for a in scored_articles if a["raw_similarity"] >= 0.30]
+        results = filtered[:top_k] if filtered else [a for a in scored_articles if a["raw_similarity"] >= 0.22][:top_k]
 
         top_score = results[0]["relevance_score"] if results else "N/A"
         logger.info(f"Retrieved {len(results)} high-precision evidence items (top score: {top_score})")

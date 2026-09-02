@@ -21,13 +21,14 @@ class QueryGenerator:
         Generate 3-5 distinct search queries for news and web APIs.
         """
         system_prompt = (
-            "You are a search query formulation expert for news verification. Given a news claim and entities, "
-            "generate 3 to 5 targeted search query strings optimized for Google News and NewsAPI.\n"
-            "Rules:\n"
-            "- Queries should use concise keywords (3 to 6 words each), omitting conversational stop words.\n"
-            "- Angle 1: Exact event/claim keywords.\n"
-            "- Angle 2: Key entities + action.\n"
-            "- Angle 3: Verification / official announcement terms (e.g. 'statement', 'clarification', 'official').\n"
+            "You are a precision search query formulation expert for news verification. Given a news claim and entities, "
+            "generate 3 to 4 targeted search query strings optimized for Google News and NewsAPI.\n"
+            "STRICT RULES:\n"
+            "- MANDATORY: EVERY query MUST include the primary subject or person/location from the claim (e.g. 'Vijay', 'Tamil Nadu') so we never retrieve unrelated global news.\n"
+            "- Queries must be concise (3 to 6 words each), omitting conversational stop words.\n"
+            "- Query 1: Main subject + core action (e.g. 'Vijay withdraws protest cases Tamil Nadu').\n"
+            "- Query 2: Entity combination + event (e.g. 'CM Vijay farmers teachers cases withdrawal').\n"
+            "- Query 3: Main subject + official report (e.g. 'Tamil Nadu assembly Vijay announcement cases').\n"
             "Respond ONLY with a JSON object: {\"queries\": [\"query1\", \"query2\", \"query3\"]}"
         )
 
