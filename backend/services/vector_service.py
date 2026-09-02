@@ -165,12 +165,17 @@ class VectorSearchService:
                 "relevance_score": round(weighted_score, 4)
             })
 
-        # Sort by relevance score descending
-        scored_articles.sort(key=lambda x: x["relevance_score"], reverse=True)
-
         # Filter out irrelevant noise (semantic similarity threshold >= 0.30)
         filtered = [a for a in scored_articles if a["raw_similarity"] >= 0.30]
-        results = filtered[:top_k] if filtered else [a for a in scored_articles if a["raw_similarity"] >= 0.22][:top_k]
+        results = filtered[:top_k] if filtered else [a for a in scored_articles if a["raw_similarity"] >= 0.25][:top_k]
+
+        # Prioritize established newsrooms (The Hindu, Times of India, BBC, Reuters, NDTV, Indian Express)
+        def rank_key(item):
+            tier = item.get("credibility_tier", "")
+            is_reputable = tier in ("WIRE_AND_PRIMARY_AGENCY", "ESTABLISHED_NEWS_ORGANIZATION", "INSTITUTIONAL_OFFICIAL")
+            return (1 if is_reputable else 0, item["relevance_score"])
+
+        results.sort(key=rank_key, reverse=True)
 
         top_score = results[0]["relevance_score"] if results else "N/A"
         logger.info(f"Retrieved {len(results)} high-precision evidence items (top score: {top_score})")

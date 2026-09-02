@@ -18,8 +18,11 @@ class SourceCredibilityService:
         "bbc.com", "bbc.co.uk", "theguardian.com", "nytimes.com", "washingtonpost.com",
         "wsj.com", "ft.com", "economist.com", "aljazeera.com", "npr.org", "pbs.org",
         "thehindu.com", "indianexpress.com", "ndtv.com", "hindustantimes.com", "timesofindia.indiatimes.com",
-        "livemint.com", "theprint.in", "scroll.in", "thequint.com", "moneycontrol.com",
-        "dw.com", "france24.com", "abcnews.go.com", "cbsnews.com", "nbcnews.com"
+        "indiatoday.in", "economictimes.indiatimes.com", "newindianexpress.com", "outlookindia.com",
+        "deccanherald.com", "livemint.com", "theprint.in", "scroll.in", "thequint.com", "moneycontrol.com",
+        "financialexpress.com", "business-standard.com", "telegraphindia.com", "tribuneindia.com",
+        "firstpost.com", "dw.com", "france24.com", "abcnews.go.com", "cbsnews.com", "nbcnews.com",
+        "cricbuzz.com", "espncricinfo.com", "icc-cricket.com"
     }
 
     GOVERNMENT_AND_ACADEMIC = {
@@ -52,12 +55,18 @@ class SourceCredibilityService:
             }
 
         # Check established mainstream
-        if domain in self.ESTABLISHED_MAINSTREAM or any(m in source_lower for m in ["bbc", "guardian", "hindu", "indian express", "new york times", "ndtv"]):
+        mainstream_keywords = [
+            "bbc", "guardian", "hindu", "indian express", "new york times", "ndtv",
+            "times of india", "hindustan times", "india today", "economic times",
+            "outlook", "deccan herald", "tribune", "livemint", "moneycontrol",
+            "firstpost", "cricbuzz", "icc", "al jazeera", "reuters", "associated press"
+        ]
+        if domain in self.ESTABLISHED_MAINSTREAM or any(m in source_lower for m in mainstream_keywords):
             return {
                 "domain": domain,
                 "tier": "ESTABLISHED_NEWS_ORGANIZATION",
                 "label": "Established News Organization",
-                "weight_hint": 0.85
+                "weight_hint": 0.90
             }
 
         return {
