@@ -59,11 +59,18 @@ class VectorSearchService:
         if verification_id not in self._store:
             self._store[verification_id] = []
 
+        # Select up to top 25 candidate articles prioritizing established newsrooms
+        def candidate_priority(a):
+            tier = a.get("credibility_tier", "")
+            return 1 if tier in ("WIRE_AND_PRIMARY_AGENCY", "ESTABLISHED_NEWS_ORGANIZATION", "INSTITUTIONAL_OFFICIAL") else 0
+
+        target_articles = sorted(articles, key=candidate_priority, reverse=True)[:25]
+
         # Prepare all chunks to embed in a single batch
         all_texts_to_embed = []
         chunk_map = []  # tracks which article each chunk belongs to
 
-        for art_idx, art in enumerate(articles):
+        for art_idx, art in enumerate(target_articles):
             title = art.get("title", "").strip()
             content = art.get("content", "").strip()
             chunks = [title] + self._split_into_chunks(content)
@@ -86,7 +93,7 @@ class VectorSearchService:
             })
 
         # Store in verification session
-        for art_idx, art in enumerate(articles):
+        for art_idx, art in enumerate(target_articles):
             chunks = article_chunks.get(art_idx, [])
             if not chunks:
                 continue

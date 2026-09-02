@@ -22,10 +22,11 @@ class NewsAPIService:
         return bool(self.api_key and self.api_key.strip())
 
     def _clean_query(self, query: str) -> str:
-        """Strip punctuation and invalid characters that disrupt NewsAPI query syntax."""
+        """Strip punctuation and format concise 2-3 keyword queries for NewsAPI."""
         cleaned = re.sub(r'["\'\(\)\[\]\{\}\+\-]', ' ', query)
-        words = cleaned.split()
-        return " ".join(words[:6])
+        stop = {"announced", "announces", "reported", "statement", "case", "cases", "and", "the", "for", "with", "from", "over"}
+        words = [w for w in cleaned.split() if w.lower() not in stop]
+        return " ".join(words[:3])
 
     async def search(self, queries: List[str]) -> List[Dict[str, Any]]:
         """

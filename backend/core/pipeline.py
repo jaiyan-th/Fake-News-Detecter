@@ -96,14 +96,17 @@ class VerificationPipeline:
             details={"primary_claim": claim_info.primary_claim, "entities": claim_info.entities}
         ))
 
-        # STAGE 3: Search Query Generation (Groq)
+        # STAGE 3: Search Query Generation (Groq / Instant Cached)
         t0 = time.time()
-        queries = self.query_generator.generate_queries(claim_info)
-        # Add focused newsroom query for verified outlets
+        cached = getattr(claim_info, "_cached_queries", None)
+        queries = cached if cached else self.query_generator.generate_queries(claim_info)
+
+        # Explicitly target verified newsrooms (Times of India, Indian Express, The Hindu, NDTV, News18, CNN)
         search_queries = list(queries)
         if claim_info.entities:
             top_entity = claim_info.entities[0]
-            search_queries.append(f"{top_entity} The Hindu OR Times of India OR Indian Express")
+            search_queries.append(f"{top_entity} Times of India OR Indian Express OR The Hindu")
+            search_queries.append(f"{top_entity} NDTV OR News18 OR CNN")
 
         stage_duration = round((time.time() - t0) * 1000, 2)
         pipeline_stages.append(PipelineStage(
