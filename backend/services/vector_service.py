@@ -172,9 +172,10 @@ class VectorSearchService:
                 "relevance_score": round(weighted_score, 4)
             })
 
-        # Filter out irrelevant noise (semantic similarity threshold >= 0.30)
-        filtered = [a for a in scored_articles if a["raw_similarity"] >= 0.30]
-        results = filtered[:top_k] if filtered else [a for a in scored_articles if a["raw_similarity"] >= 0.25][:top_k]
+        # Filter by semantic similarity threshold (>= 0.25)
+        filtered = [a for a in scored_articles if a["raw_similarity"] >= 0.25]
+        # Guaranteed fallback: if strict threshold yielded nothing, return top scored candidates
+        results = filtered[:top_k] if filtered else scored_articles[:top_k]
 
         # Prioritize established newsrooms (The Hindu, Times of India, BBC, Reuters, NDTV, Indian Express)
         def rank_key(item):

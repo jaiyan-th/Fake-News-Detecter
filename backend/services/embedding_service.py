@@ -43,11 +43,15 @@ class EmbeddingService:
             except Exception as e:
                 logger.error(f"Embedding generation error: {e}")
 
-        # Deterministic fallback vector when fastembed is not installed
-        np.random.seed(abs(hash(text[:50])) % (2**32))
-        vec = np.random.randn(settings.EMBEDDING_DIM).astype(np.float32)
+        # Lexical-semantic hash vector fallback (preserves word similarity if neural model fails)
+        import re
+        words = set(re.findall(r'\b\w+\b', text.lower()))
+        vec = np.zeros(settings.EMBEDDING_DIM, dtype=np.float32)
+        for w in words:
+            idx = abs(hash(w)) % settings.EMBEDDING_DIM
+            vec[idx] += 1.0
         norm = np.linalg.norm(vec)
-        return (vec / norm).tolist()
+        return (vec / norm).tolist() if norm > 0 else [0.0] * settings.EMBEDDING_DIM
 
     def embed_batch(self, texts: List[str]) -> List[List[float]]:
         """Generate embeddings for a list of strings efficiently"""
