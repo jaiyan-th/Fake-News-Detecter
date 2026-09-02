@@ -6,7 +6,7 @@ import pytest
 from backend.services.article_extractor import ArticleExtractor
 from backend.core.exceptions import ArticleExtractionError
 from backend.services.embedding_service import EmbeddingService
-from backend.services.qdrant_service import QdrantService
+from backend.services.vector_service import VectorSearchService
 
 
 def test_article_extractor_invalid_url():
@@ -17,13 +17,13 @@ def test_article_extractor_invalid_url():
     assert "Invalid URL format" in str(exc_info.value)
 
 
-def test_embedding_and_qdrant_fallback():
-    """Verify that embedding and Qdrant in-memory fallback works seamlessly without external services"""
+def test_embedding_and_vector_search():
+    """Verify that FastEmbed embedding and vector search work seamlessly in memory"""
     emb_service = EmbeddingService()
     vector = emb_service.embed_text("India launches new space mission")
     assert len(vector) == 384
 
-    qdrant_service = QdrantService(emb_service)
+    vector_service = VectorSearchService(emb_service)
     session_id = "test-session-123"
 
     articles = [
@@ -41,10 +41,10 @@ def test_embedding_and_qdrant_fallback():
         }
     ]
 
-    indexed_count = qdrant_service.index_evidence(session_id, articles)
+    indexed_count = vector_service.index_evidence(session_id, articles)
     assert indexed_count == 1
 
-    retrieved = qdrant_service.retrieve_relevant_evidence("ISRO satellite launch", session_id, top_k=2)
+    retrieved = vector_service.retrieve_relevant_evidence("ISRO satellite launch", session_id, top_k=2)
     assert len(retrieved) == 1
     assert retrieved[0]["source_name"] == "The Hindu"
     assert retrieved[0]["relevance_score"] > 0.0

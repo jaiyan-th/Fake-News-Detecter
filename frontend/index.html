@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VerifyNews — AI-Powered Evidence-Based News Verification</title>
-    <meta name="description" content="Verify whether a news claim is supported by reliable sources using real-time news retrieval, Qdrant RAG, and Groq LLM.">
+    <meta name="description" content="Verify whether a news claim is supported by reliable sources using real-time news retrieval, Semantic Vector RAG, and Groq LLM.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -30,7 +30,7 @@
 
             <div class="nav-center desktop-only">
                 <span class="chip">Groq LLM</span>
-                <span class="chip">Qdrant RAG</span>
+                <span class="chip">Vector RAG</span>
                 <span class="chip">Multi-Source</span>
             </div>
 
@@ -154,7 +154,7 @@
                     <div class="p-step" id="ps-ingest"><span class="p-dot"></span><span>Ingesting content</span></div>
                     <div class="p-step" id="ps-claim"><span class="p-dot"></span><span>Extracting claims &amp; entities</span></div>
                     <div class="p-step" id="ps-search"><span class="p-dot"></span><span>Searching NewsAPI &amp; Google News</span></div>
-                    <div class="p-step" id="ps-rag"><span class="p-dot"></span><span>Qdrant semantic retrieval</span></div>
+                    <div class="p-step" id="ps-rag"><span class="p-dot"></span><span>Semantic vector retrieval</span></div>
                     <div class="p-step" id="ps-stance"><span class="p-dot"></span><span>LLM evidence stance analysis</span></div>
                     <div class="p-step" id="ps-verdict"><span class="p-dot"></span><span>Synthesizing verdict</span></div>
                 </div>
@@ -243,7 +243,7 @@
 
     <!-- Footer -->
     <footer class="site-footer">
-        <p>Powered by <strong>Groq LLM</strong> · <strong>FastEmbed</strong> · <strong>Qdrant</strong> · <strong>NewsAPI</strong></p>
+        <p>Powered by <strong>Groq LLM</strong> · <strong>FastEmbed Vector RAG</strong> · <strong>NewsAPI</strong></p>
     </footer>
 
     <!-- ===== AUTH MODAL ===== -->

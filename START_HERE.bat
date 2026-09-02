@@ -1,11 +1,11 @@
 @echo off
 title AI News Verification System
 echo ========================================================================
-echo    🔍 AI NEWS VERIFICATION SYSTEM (FastAPI + Groq + Qdrant)
+echo    🔍 AI NEWS VERIFICATION SYSTEM (FastAPI + Groq + Vector RAG)
 echo ========================================================================
 echo.
 echo Welcome! This system verifies news claims against real-time news reporting
-echo using Groq LLM, Qdrant Vector DB, and multi-source evidence retrieval.
+echo using Groq LLM, Semantic Vector Search, and multi-source evidence retrieval.
 echo.
 
 :menu

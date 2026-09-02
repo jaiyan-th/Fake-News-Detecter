@@ -1,7 +1,7 @@
 """
 Verification Pipeline Orchestrator
 Coordinates all pipeline stages: Article Extraction -> Claim Extraction -> Search ->
-Normalization & Deduplication -> Embedding & Qdrant -> Stance Analysis -> Verdict Synthesis.
+Normalization & Deduplication -> Vector Embedding & Semantic Retrieval -> Stance Analysis -> Verdict Synthesis.
 """
 
 import time
@@ -18,7 +18,7 @@ from backend.services.query_generator import QueryGenerator
 from backend.services.newsapi_service import NewsAPIService
 from backend.services.serpapi_service import SerpAPIService
 from backend.services.source_normalizer import SourceNormalizer
-from backend.services.qdrant_service import QdrantService
+from backend.services.vector_service import VectorSearchService
 from backend.services.evidence_analyzer import EvidenceAnalyzer
 from backend.services.verdict_generator import VerdictGenerator
 from backend.core.config import settings
@@ -35,7 +35,7 @@ class VerificationPipeline:
         newsapi_service: NewsAPIService,
         serpapi_service: SerpAPIService,
         source_normalizer: SourceNormalizer,
-        qdrant_service: QdrantService,
+        vector_service: VectorSearchService,
         evidence_analyzer: EvidenceAnalyzer,
         verdict_generator: VerdictGenerator
     ):
@@ -45,7 +45,7 @@ class VerificationPipeline:
         self.newsapi_service = newsapi_service
         self.serpapi_service = serpapi_service
         self.source_normalizer = source_normalizer
-        self.qdrant_service = qdrant_service
+        self.vector_service = vector_service
         self.evidence_analyzer = evidence_analyzer
         self.verdict_generator = verdict_generator
 
@@ -144,17 +144,17 @@ class VerificationPipeline:
             details={"unique_articles": len(normalized_articles)}
         ))
 
-        # STAGE 6: Qdrant Indexing & Semantic Retrieval
+        # STAGE 6: Semantic Vector Indexing & Retrieval
         t0 = time.time()
-        self.qdrant_service.index_evidence(verification_id, normalized_articles)
-        retrieved_evidence = self.qdrant_service.retrieve_relevant_evidence(
+        self.vector_service.index_evidence(verification_id, normalized_articles)
+        retrieved_evidence = self.vector_service.retrieve_relevant_evidence(
             query_text=claim_info.primary_claim,
             verification_id=verification_id,
             top_k=settings.TOP_K_EVIDENCE
         )
         stage_duration = round((time.time() - t0) * 1000, 2)
         pipeline_stages.append(PipelineStage(
-            stage="qdrant_semantic_retrieval",
+            stage="semantic_vector_retrieval",
             status="COMPLETED",
             duration_ms=stage_duration,
             details={"top_k_retrieved": len(retrieved_evidence)}

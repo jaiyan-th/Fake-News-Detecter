@@ -25,7 +25,7 @@ router = APIRouter(prefix="/api/v1", tags=["Verification"])
     summary="Verify a news URL or text claim",
     description=(
         "Analyzes a submitted news URL or text claim against real-time retrieved news sources, "
-        "indexes and retrieves evidence via Qdrant semantic search, and evaluates claim support/contradiction "
+        "indexes and retrieves evidence via semantic vector search, and evaluates claim support/contradiction "
         "using Groq LLM to return a transparent verdict (REAL, FALSE, MISLEADING, UNVERIFIED). "
         "If the user is authenticated via Bearer token, the verification is automatically saved to their history."
     )

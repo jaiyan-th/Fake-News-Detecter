@@ -26,10 +26,6 @@ class Settings(BaseSettings):
     NEWS_API_KEY: Optional[str] = Field(default=None, description="NewsAPI Key for real-time news retrieval")
     SERPAPI_KEY: Optional[str] = Field(default=None, description="SerpAPI Key for Google News search")
 
-    # Qdrant Vector DB
-    QDRANT_URL: str = Field(default="http://localhost:6333", description="Qdrant service URL (local or cloud)")
-    QDRANT_API_KEY: Optional[str] = Field(default=None, description="Qdrant API Key for cloud instances")
-    QDRANT_COLLECTION: str = Field(default="news_evidence", description="Stable Qdrant collection name")
 
     # Embeddings
     EMBEDDING_MODEL: str = Field(default="BAAI/bge-small-en-v1.5", description="FastEmbed model identifier")

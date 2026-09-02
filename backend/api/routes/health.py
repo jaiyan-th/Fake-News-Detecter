@@ -8,9 +8,9 @@ from backend.schemas.health import HealthResponse
 from backend.services.groq_service import GroqService
 from backend.services.newsapi_service import NewsAPIService
 from backend.services.serpapi_service import SerpAPIService
-from backend.services.qdrant_service import QdrantService
+from backend.services.vector_service import VectorSearchService
 from backend.api.deps import (
-    get_groq_service, get_newsapi_service, get_serpapi_service, get_qdrant_service
+    get_groq_service, get_newsapi_service, get_serpapi_service, get_vector_service
 )
 
 router = APIRouter(prefix="/api/v1", tags=["Health & Diagnostics"])
@@ -20,20 +20,19 @@ router = APIRouter(prefix="/api/v1", tags=["Health & Diagnostics"])
     "/health",
     response_model=HealthResponse,
     summary="System Health and Diagnostics",
-    description="Returns status of the FastAPI backend application and its external dependencies (Groq, NewsAPI, SerpAPI, Qdrant)."
+    description="Returns status of the FastAPI backend application and its core services (Groq, NewsAPI, SerpAPI, Vector Search Engine)."
 )
 async def check_system_health(
     groq_service: GroqService = Depends(get_groq_service),
     newsapi_service: NewsAPIService = Depends(get_newsapi_service),
     serpapi_service: SerpAPIService = Depends(get_serpapi_service),
-    qdrant_service: QdrantService = Depends(get_qdrant_service)
+    vector_service: VectorSearchService = Depends(get_vector_service)
 ) -> HealthResponse:
     groq_ok = groq_service.is_available()
     newsapi_ok = newsapi_service.is_configured()
     serpapi_ok = serpapi_service.is_configured()
-    qdrant_ok = qdrant_service.is_available()
+    vector_ok = vector_service.is_available()
 
-    # Distinguish core application running from optional dependency statuses
     overall_status = "healthy"
     if not groq_ok:
         overall_status = "degraded"
@@ -51,9 +50,9 @@ async def check_system_health(
             "status": "operational" if serpapi_ok else "unconfigured",
             "role": "Google News broad search"
         },
-        "qdrant_vector_db": {
-            "status": "operational" if qdrant_ok else "in_memory_fallback",
-            "collection": "news_evidence"
+        "vector_search_engine": {
+            "status": "operational" if vector_ok else "unavailable",
+            "role": "In-memory semantic vector index & similarity retrieval"
         },
         "embedding_engine": {
             "status": "operational",

@@ -49,7 +49,7 @@ class SearchProviderError(NewsVerificationException):
 
 
 class VectorDBError(NewsVerificationException):
-    """Raised when Qdrant operation fails"""
+    """Raised when vector search operation fails"""
     def __init__(self, message: str, details: dict = None):
         super().__init__(
             message=message,

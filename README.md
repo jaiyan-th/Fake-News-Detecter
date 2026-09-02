@@ -2,7 +2,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg)](https://fastapi.tiangolo.com)
-[![Qdrant](https://img.shields.io/badge/Qdrant-Vector_DB-dc2626.svg)](https://qdrant.tech)
+[![Vector RAG](https://img.shields.io/badge/Vector_RAG-FastEmbed-818cf8.svg)](https://github.com/qdrant/fastembed)
 [![Groq](https://img.shields.io/badge/Groq-Llama_3.1_Inference-f97316.svg)](https://groq.com)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -20,7 +20,7 @@ When encountering a suspicious claim on social media or browsing the web, users 
 3. **Formulates** targeted search queries across multiple angles.
 4. **Retrieves** real-time news articles from **NewsAPI** and **Google News (SerpAPI)**.
 5. **Deduplicates** cross-publisher syndicated wire stories.
-6. **Indexes & Semantically Searches** evidence using **FastEmbed (`BAAI/bge-small-en-v1.5`)** and a stable **Qdrant** collection (`news_evidence`).
+6. **Indexes & Semantically Searches** evidence using **FastEmbed (`BAAI/bge-small-en-v1.5`)** and in-memory cosine similarity search.
 7. **Evaluates** stance (`SUPPORT`, `CONTRADICT`, `NEUTRAL`) and context for each retrieved source using Groq LLM.
 8. **Synthesizes** a transparent verdict: `REAL`, `FALSE`, `MISLEADING`, or `UNVERIFIED` with evidence snippets and confidence breakdown.
 
@@ -50,11 +50,11 @@ USER INPUT (URL or Text)
                                  ▼
                      Source Normalization & Wire Deduplication
                                  ▼
-                     FastEmbed (384-dim Dense Vectors)
-                                 ▼
-                     Qdrant Vector Database (`news_evidence`)
-                                 ▼
-                     Semantic Evidence Retrieval (Top-K)
+                      FastEmbed (384-dim Dense Vectors)
+                                  ▼
+                      In-Memory Semantic Vector Index
+                                  ▼
+                      Semantic Evidence Retrieval (Top-K)
                                  ▼
                      Groq LLM — Stance & Nuance Analysis (SUPPORT / CONTRADICT / NEUTRAL)
                                  ▼
@@ -85,7 +85,6 @@ USER INPUT (URL or Text)
 - Free [Groq API Key](https://console.groq.com)
 - Free [NewsAPI Key](https://newsapi.org)
 - (Optional) [SerpAPI Key](https://serpapi.com)
-- (Optional) Qdrant running locally via Docker or in-memory fallback
 
 ### 2. Installation
 ```bash
@@ -102,10 +101,6 @@ Create a `.env` file in the project root:
 GROQ_API_KEY=your-groq-api-key
 NEWS_API_KEY=your-news-api-key
 SERPAPI_KEY=your-serpapi-key-optional
-
-# Qdrant (defaults to in-memory if no local server running)
-QDRANT_URL=http://localhost:6333
-QDRANT_COLLECTION=news_evidence
 ```
 
 ### 4. Start the Application
@@ -174,7 +169,7 @@ Verify a news URL or text claim.
     { "stage": "article_extraction", "status": "COMPLETED", "duration_ms": 350 },
     { "stage": "claim_extraction", "status": "COMPLETED", "duration_ms": 480 },
     { "stage": "multi_source_search", "status": "COMPLETED", "duration_ms": 1100 },
-    { "stage": "qdrant_semantic_retrieval", "status": "COMPLETED", "duration_ms": 120 },
+    { "stage": "semantic_vector_retrieval", "status": "COMPLETED", "duration_ms": 120 },
     { "stage": "verdict_synthesis", "status": "COMPLETED", "duration_ms": 650 }
   ],
   "processing_time_ms": 2700

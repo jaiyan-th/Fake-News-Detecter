@@ -1,7 +1,7 @@
 """
 Embedding Service using FastEmbed (ONNX Runtime)
 Provides lightweight, high-speed 384-dimensional dense vector embeddings.
-Strictly used for semantic retrieval in Qdrant (NO ML classification).
+Strictly used for semantic retrieval in RAG (NO ML classification).
 """
 
 import logging

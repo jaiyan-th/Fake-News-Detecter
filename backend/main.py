@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI):
     logger.info(f"Groq API Key configured: {bool(settings.GROQ_API_KEY)}")
     logger.info(f"NewsAPI Key configured: {bool(settings.NEWS_API_KEY)}")
     logger.info(f"SerpAPI Key configured: {bool(settings.SERPAPI_KEY)}")
-    logger.info(f"Qdrant URL: {settings.QDRANT_URL} (collection: {settings.QDRANT_COLLECTION})")
+    logger.info(f"Semantic Vector Search: FastEmbed ({settings.EMBEDDING_MODEL})")
     yield
     logger.info(f"Shutting down {settings.APP_NAME}")
 
@@ -51,7 +51,7 @@ app = FastAPI(
     description=(
         "Production-grade evidence-based News Verification API.\n\n"
         "Features JWT Authentication, User Verification History, real-time news retrieval (NewsAPI & SerpAPI), "
-        "FastEmbed semantic vector embeddings, Qdrant vector similarity search, and Groq LLMs for grounded claim verification."
+        "FastEmbed semantic vector embeddings, in-memory cosine similarity search, and Groq LLMs for grounded claim verification."
     ),
     docs_url="/docs",
     redoc_url="/redoc",

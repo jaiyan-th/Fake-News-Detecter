@@ -18,7 +18,7 @@ def test_health_endpoint():
     assert "dependencies" in data
     assert "groq_llm" in data["dependencies"]
     assert "news_api" in data["dependencies"]
-    assert "qdrant_vector_db" in data["dependencies"]
+    assert "vector_search_engine" in data["dependencies"]
 
 
 def test_verify_validation_both_url_and_text():

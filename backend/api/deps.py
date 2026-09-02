@@ -20,7 +20,7 @@ from backend.services.serpapi_service import SerpAPIService
 from backend.services.source_credibility import SourceCredibilityService
 from backend.services.source_normalizer import SourceNormalizer
 from backend.services.embedding_service import EmbeddingService
-from backend.services.qdrant_service import QdrantService
+from backend.services.vector_service import VectorSearchService
 from backend.services.evidence_analyzer import EvidenceAnalyzer
 from backend.services.verdict_generator import VerdictGenerator
 from backend.services.auth_service import AuthService
@@ -81,8 +81,8 @@ def get_embedding_service() -> EmbeddingService:
 
 
 @lru_cache()
-def get_qdrant_service() -> QdrantService:
-    return QdrantService(get_embedding_service())
+def get_vector_service() -> VectorSearchService:
+    return VectorSearchService(get_embedding_service())
 
 
 @lru_cache()
@@ -114,7 +114,7 @@ def get_verification_pipeline() -> VerificationPipeline:
         newsapi_service=get_newsapi_service(),
         serpapi_service=get_serpapi_service(),
         source_normalizer=get_source_normalizer(),
-        qdrant_service=get_qdrant_service(),
+        vector_service=get_vector_service(),
         evidence_analyzer=get_evidence_analyzer(),
         verdict_generator=get_verdict_generator()
     )
