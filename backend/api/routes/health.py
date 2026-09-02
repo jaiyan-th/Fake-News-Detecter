@@ -65,5 +65,36 @@ async def check_system_health(
         status=overall_status,
         application="running",
         dependencies=dependencies,
-        timestamp=datetime.now(timezone.utc)
+        timestamp=datetime.now(timezone.utc).isoformat()
     )
+
+
+@router.get("/health/test-search", summary="Search Diagnostics")
+async def test_search_diagnostics(
+    q: str = "Vijay",
+    newsapi_service: NewsAPIService = Depends(get_newsapi_service),
+    serpapi_service: SerpAPIService = Depends(get_serpapi_service)
+):
+    import httpx, xml.etree.ElementTree as ET
+    # Test Google News RSS directly
+    rss_status = "unknown"
+    rss_items_count = 0
+    rss_error = None
+    try:
+        async with httpx.AsyncClient(timeout=5, follow_redirects=True) as client:
+            r = await client.get(f"https://news.google.com/rss/search?q={q}&hl=en-IN&gl=IN&ceid=IN:en", headers={"User-Agent": "Mozilla/5.0"})
+            rss_status = r.status_code
+            if r.status_code == 200:
+                root = ET.fromstring(r.content)
+                rss_items_count = len(root.findall(".//item"))
+    except Exception as e:
+        rss_error = str(e)
+
+    news_res = await newsapi_service.search([q])
+    serp_res = await serpapi_service.search_google_news([q])
+    return {
+        "query": q,
+        "direct_rss": {"status": rss_status, "count": rss_items_count, "error": rss_error},
+        "newsapi": {"configured": newsapi_service.is_configured(), "count": len(news_res), "sample": [a["title"] for a in news_res[:2]]},
+        "serpapi": {"configured": bool(serpapi_service.api_key), "count": len(serp_res), "sample": [a["title"] for a in serp_res[:2]]}
+    }

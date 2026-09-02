@@ -41,10 +41,10 @@ class SourceNormalizer:
         normalized_list = []
 
         for item in raw_articles:
-            raw_url = item.get("url", "").strip()
-            title = item.get("title", "").strip()
-            content = item.get("content", "").strip() or item.get("description", "").strip()
-            source_name = item.get("source_name", "Unknown").strip()
+            raw_url = str(item.get("url") or "").strip()
+            title = str(item.get("title") or "").strip()
+            content = str(item.get("content") or item.get("description") or "").strip()
+            source_name = str(item.get("source_name") or "Unknown").strip()
 
             if not raw_url or not title or len(content) < 30:
                 continue

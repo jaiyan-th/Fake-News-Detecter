@@ -118,7 +118,7 @@ class VerificationPipeline:
         if extracted_article and extracted_article.title and len(extracted_article.content) >= 30:
             raw_articles.append({
                 "title": extracted_article.title,
-                "url": request.url,
+                "url": str(request.url),
                 "source_name": extracted_article.publisher or "Submitted Article",
                 "author": extracted_article.author,
                 "published_at": extracted_article.published_date,
