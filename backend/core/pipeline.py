@@ -96,24 +96,18 @@ class VerificationPipeline:
             details={"primary_claim": claim_info.primary_claim, "entities": claim_info.entities}
         ))
 
-        # STAGE 3: Search Query Generation (Groq / Instant Cached)
+        # STAGE 3: Universal Search Query Generation (Groq / Instant Cached)
         t0 = time.time()
         cached = getattr(claim_info, "_cached_queries", None)
         queries = cached if cached else self.query_generator.generate_queries(claim_info)
-
-        # Explicitly target verified newsrooms (Times of India, Indian Express, The Hindu, NDTV, News18, CNN)
-        search_queries = list(queries)
-        if claim_info.entities:
-            top_entity = claim_info.entities[0]
-            search_queries.append(f"{top_entity} Times of India OR Indian Express OR The Hindu")
-            search_queries.append(f"{top_entity} NDTV OR News18 OR CNN")
+        search_queries = [q.strip() for q in queries if q and len(q.strip()) >= 3]
 
         stage_duration = round((time.time() - t0) * 1000, 2)
         pipeline_stages.append(PipelineStage(
             stage="query_generation",
             status="COMPLETED",
             duration_ms=stage_duration,
-            details={"generated_queries": queries}
+            details={"generated_queries": search_queries}
         ))
 
         # STAGE 4: Multi-Provider Concurrent Search (Google News + NewsAPI)
