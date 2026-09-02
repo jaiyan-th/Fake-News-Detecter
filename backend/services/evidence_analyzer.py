@@ -98,7 +98,7 @@ class EvidenceAnalyzer:
             elif raw_stance == "CONTRADICT":
                 stance = StanceEnum.CONTRADICT
 
-            snippet = eval_data.get("evidence_snippet") or doc.get("content_snippet", "")[:200]
+            snippet = eval_data.get("evidence_snippet") or doc.get("evidence_snippet") or doc.get("content_snippet", "")[:300]
 
             analyzed_sources.append(EvidenceSource(
                 source_name=doc.get("source_name", "Unknown"),
