@@ -36,8 +36,8 @@
                 </div>
                 <div class="nav-links">
                     <a href="#inputCard">Live Wire Stream</a>
-                    <a href="#pipelineRadar">Methodology</a>
-                    <a href="#dispatchesGrid">API &amp; Newsrooms</a>
+                    <a href="#scopeSection">Methodology</a>
+                    <a href="#footerFeeds">API &amp; Newsrooms</a>
                 </div>
             </div>
 
@@ -73,27 +73,24 @@
                 Institutional-grade, real-time forensic cross-examination of breaking assertions and syndicate cables against tier-1 global investigative desks.
             </p>
 
-            <!-- Hot Intelligence Dossiers -->
+            <!-- Quick Intelligence Samples -->
             <div class="dossiers-wrap">
                 <span class="dossiers-label">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                     HOT INTELLIGENCE DOSSIERS
                 </span>
                 <div class="dossiers-grid">
-                    <button class="dossier-pill" onclick="loadSampleDossier('isro')">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        ISRO Gaganyaan 2025 Launch
-                        <span class="pill-stat real">94% Real</span>
+                    <button class="dossier-pill" onclick="loadSampleText('ISRO announces final uncrewed orbital flight test for Gaganyaan mission scheduled for Q3 2025 with human-rated LVM3.')">
+                        🚀 ISRO Gaganyaan 2025 Launch
                     </button>
-                    <button class="dossier-pill" onclick="loadSampleDossier('rbi')">
+                    <button class="dossier-pill" onclick="loadSampleText('Reserve Bank of India officially mandates all Indian commercial banks to adopt digital rupee offline transactions.')">
                         🏦 RBI Digital Rupee Offline Wallet
                     </button>
-                    <button class="dossier-pill" onclick="loadSampleDossier('tn')">
-                        🏛️ TN Assembly Protests Docket
-                        <span class="pill-stat mislead">Misleading</span>
+                    <button class="dossier-pill" onclick="loadSampleUrl('https://www.newindianexpress.com/states/tamil-nadu/2026/Sep/02/tn-cm-vijay-announces-withdrawal-of-cases-against-farmers-teachers-over-protests-from-2021-26')">
+                        📰 TN CM Vijay Protest Cases
                     </button>
-                    <button class="dossier-pill" onclick="loadSampleDossier('who')">
-                        🌐 WHO Global Accord 2025
+                    <button class="dossier-pill" onclick="loadSampleText('World Health Organization declares complete international eradication of wild poliovirus transmission.')">
+                        🌐 WHO Global Accord
                     </button>
                 </div>
             </div>
@@ -115,7 +112,7 @@
                 <div class="input-utilities">
                     <button class="util-link" onclick="pasteSampleToCurrent()">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                        Paste Sample
+                        Paste
                     </button>
                     <button class="util-link" onclick="clearCurrentInput()">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -131,9 +128,9 @@
                         <span class="dot-indicator"></span>
                         CORE ASSERTION OR OPERATIONAL HEADLINE
                     </span>
-                    <span class="char-counter" id="charCounter">121 / 500 characters</span>
+                    <span class="char-counter" id="charCounter">0 / 500 characters</span>
                 </div>
-                <textarea class="main-textarea" id="inputText" rows="3" placeholder="Enter breaking news statement, syndicate wire claim, or report excerpt to cross-verify..." oninput="updateCharCounter()">ISRO announces final uncrewed orbital flight test for Gaganyaan mission scheduled for Q3 2025 with human-rated LVM3.</textarea>
+                <textarea class="main-textarea" id="inputText" rows="3" placeholder="Enter breaking news statement, syndicate wire claim, or report excerpt to cross-verify across live newsrooms..." oninput="updateCharCounter()"></textarea>
             </div>
 
             <!-- URL Panel -->
@@ -145,13 +142,13 @@
                     </span>
                     <span class="char-counter">Direct Webhook Extractor</span>
                 </div>
-                <input type="url" class="main-input-url" id="inputUrl" placeholder="https://timesofindia.indiatimes.com/... or reuters.com/..." autocomplete="off">
+                <input type="url" class="main-input-url" id="inputUrl" placeholder="https://timesofindia.indiatimes.com/... or indianexpress.com/..." autocomplete="off">
             </div>
 
             <div class="input-bottom-bar">
                 <div class="ref-indicator">
                     <span class="ref-dot"></span>
-                    Cross-referencing 5 tier-1 global wire desks &amp; official gazettes
+                    Cross-referencing live newsrooms (The Hindu, Indian Express, TOI, Reuters, BBC)
                 </div>
                 <button class="cta-execute" id="verifyBtn" onclick="executeVerification()">
                     <span id="ctaBtnIcon">
@@ -162,85 +159,78 @@
             </div>
         </section>
 
-        <!-- 6-STEP AUTONOMOUS PIPELINE PROGRESS RADAR -->
-        <section class="pipeline-radar-card" id="pipelineRadar">
+        <!-- 6-STEP AUTONOMOUS PIPELINE PROGRESS RADAR (Hidden initially) -->
+        <section class="pipeline-radar-card hidden" id="pipelineRadar">
             <div class="radar-header">
                 <div class="radar-title-group">
                     <span class="radar-title">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
                         AUTONOMOUS PIPELINE PROGRESS RADAR
                     </span>
-                    <span class="badge-autosync">AUTO-SYNC</span>
+                    <span class="badge-autosync">LIVE SYNC</span>
                 </div>
                 <div class="radar-stats">
                     <span class="pulsing-dot"></span>
-                    <span id="radarLatency">Pipeline: 620ms</span> · <span id="radarSources">14 Ingested Sources</span>
+                    <span id="radarLatency">Pipeline: Running…</span> · <span id="radarSources">Evaluating Live Feeds</span>
                 </div>
             </div>
 
             <div class="radar-grid">
-                <div class="radar-step done" id="rstep-1">
-                    <div class="step-check-circle">✓</div>
+                <div class="radar-step" id="rstep-1">
+                    <div class="step-check-circle">1</div>
                     <div class="step-text">
                         <span class="step-name">1. Ingest</span>
-                        <span class="step-detail">Sanitized</span>
+                        <span class="step-detail">Content Sanitized</span>
                     </div>
                 </div>
-                <div class="radar-step done" id="rstep-2">
-                    <div class="step-check-circle">✓</div>
+                <div class="radar-step" id="rstep-2">
+                    <div class="step-check-circle">2</div>
                     <div class="step-text">
                         <span class="step-name">2. Extract</span>
-                        <span class="step-detail" id="rstepEntityCount">4 Entities</span>
+                        <span class="step-detail" id="rstepEntityCount">Claims &amp; Entities</span>
                     </div>
                 </div>
-                <div class="radar-step done" id="rstep-3">
-                    <div class="step-check-circle">✓</div>
+                <div class="radar-step" id="rstep-3">
+                    <div class="step-check-circle">3</div>
                     <div class="step-text">
-                        <span class="step-name">3. Dispatch</span>
-                        <span class="step-detail">Tier-1 Wires</span>
+                        <span class="step-name">3. Search</span>
+                        <span class="step-detail">Live News &amp; RSS</span>
                     </div>
                 </div>
-                <div class="radar-step done" id="rstep-4">
-                    <div class="step-check-circle">✓</div>
+                <div class="radar-step" id="rstep-4">
+                    <div class="step-check-circle">4</div>
                     <div class="step-text">
                         <span class="step-name">4. FastEmbed</span>
-                        <span class="step-detail">Cosine: 0.91</span>
+                        <span class="step-detail">Vector RAG Cosine</span>
                     </div>
                 </div>
-                <div class="radar-step done" id="rstep-5">
-                    <div class="step-check-circle">✓</div>
+                <div class="radar-step" id="rstep-5">
+                    <div class="step-check-circle">5</div>
                     <div class="step-text">
                         <span class="step-name">5. Stance LLM</span>
-                        <span class="step-detail">LLaMA-3.3</span>
+                        <span class="step-detail">Groq LLaMA-3.3</span>
                     </div>
                 </div>
-                <div class="radar-step final done" id="rstep-6">
-                    <div class="step-check-circle">⬡</div>
+                <div class="radar-step final" id="rstep-6">
+                    <div class="step-check-circle">6</div>
                     <div class="step-text">
                         <span class="step-name">6. Synthesis</span>
-                        <span class="step-detail" id="rstepConsensus">94% Consensus</span>
+                        <span class="step-detail" id="rstepConsensus">Grounded Verdict</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- MULTILATERAL VERDICT DOCKET (RESULTS) -->
-        <section class="docket-card" id="verdictDocket">
+        <!-- MULTILATERAL VERDICT DOCKET (Hidden initially, populated dynamically) -->
+        <section class="docket-card hidden" id="verdictDocket">
             <!-- Header Bar -->
             <div class="docket-head-bar">
                 <div class="docket-head-left">
                     <h2>
                         Multilateral Verdict Docket
-                        <span class="docket-number-tag" id="docketTag">DOCKET #VM-2025-0841</span>
+                        <span class="docket-number-tag" id="docketTag">LIVE DOCKET</span>
                     </h2>
-                    <p class="docket-sub">Cross-examination stance synthesis across accredited wire feeds and authorized press bulletins</p>
-                </div>
-                <div class="simulation-bar">
-                    <span class="sim-label">SIMULATION:</span>
-                    <button class="sim-btn real" onclick="simulateVerdict('REAL')">REAL ✓</button>
-                    <button class="sim-btn false" onclick="simulateVerdict('FALSE')">FALSE ✕</button>
-                    <button class="sim-btn mislead" onclick="simulateVerdict('MISLEADING')">MISLEADING ⚠</button>
-                    <button class="sim-btn unverified" onclick="simulateVerdict('UNVERIFIED')">UNVERIFIED ?</button>
+                    <p class="docket-sub">Cross-examination stance synthesis across accredited wire feeds and verified newsrooms</p>
                 </div>
             </div>
 
@@ -251,8 +241,8 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
                     <div>
-                        <div class="vb-title" id="vbTitle">VERIFIED FACT - HIGH CONSENSUS</div>
-                        <div class="vb-desc" id="vbDesc">Corroborated across 14 independent accredited journalistic wire sources</div>
+                        <div class="vb-title" id="vbTitle">VERIFIED FACT</div>
+                        <div class="vb-desc" id="vbDesc">Corroborated across live accredited journalistic newsrooms</div>
                     </div>
                 </div>
                 <div class="vb-actions">
@@ -274,36 +264,31 @@
                     <div class="gauge-circle-wrap">
                         <svg class="gauge-svg" viewBox="0 0 140 140">
                             <circle class="gauge-bg-circle" cx="70" cy="70" r="55"></circle>
-                            <circle class="gauge-bar-circle" id="gaugeBar" cx="70" cy="70" r="55" stroke-dasharray="345.5" stroke-dashoffset="20.7"></circle>
+                            <circle class="gauge-bar-circle" id="gaugeBar" cx="70" cy="70" r="55" stroke-dasharray="345.5" stroke-dashoffset="34.5"></circle>
                         </svg>
                         <div class="gauge-inner-text">
-                            <span class="gauge-val" id="gaugeVal">94%</span>
-                            <span class="gauge-tag" id="gaugeTag">CONSENSUS</span>
+                            <span class="gauge-val" id="gaugeVal">90%</span>
+                            <span class="gauge-tag" id="gaugeTag">CONFIDENCE</span>
                         </div>
                     </div>
                     <div class="gauge-info-title">Multilateral Stance Index</div>
-                    <p class="gauge-info-sub">Calculated via FastEmbed cosine distance indexing across 14 wires.</p>
+                    <p class="gauge-info-sub">Calculated via FastEmbed vector distance &amp; newsroom consensus.</p>
                 </div>
 
                 <!-- Column 2: Extracted Assertion & Entity Graph -->
                 <div class="docket-col-details">
                     <div class="sec-tag">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
-                        EXTRACTED ASSERTION
+                        EXTRACTED CORE ASSERTION
                     </div>
                     <div class="assertion-headline" id="assertionText">
-                        "ISRO announces final uncrewed orbital flight test for Gaganyaan mission scheduled for Q3 2025 with human-rated LVM3."
+                        "…"
                     </div>
 
                     <!-- Forensic Entity Graph -->
                     <div class="entity-graph-wrap">
                         <div class="entity-graph-label">FORENSIC ENTITY GRAPH:</div>
-                        <div class="entity-pills-row" id="entityPillsRow">
-                            <span class="entity-badge person">● Person: Dr. S. Somanath</span>
-                            <span class="entity-badge org">● Org: ISRO</span>
-                            <span class="entity-badge location">● Location: Sriharikota, AP</span>
-                            <span class="entity-badge mission">● Mission: Gaganyaan H1/D1</span>
-                        </div>
+                        <div class="entity-pills-row" id="entityPillsRow"></div>
                     </div>
 
                     <!-- Editorial RAG Synthesis -->
@@ -313,10 +298,10 @@
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                                 EDITORIAL RAG SYNTHESIS
                             </span>
-                            <span class="syn-tag-badge">Consensus LLaMA-3.3</span>
+                            <span class="syn-tag-badge">Groq LLaMA-3.3-70B</span>
                         </div>
                         <p class="syn-text" id="synthesisText">
-                            The operative headline is corroborated by simultaneous primary dispatches filed by <strong>Reuters</strong>, <strong>BBC</strong>, and <strong>The Hindu</strong> following an official press briefing at the Satish Dhawan Space Centre. Key flight hardware milestones including the liquid propellant stage qualification and crew abort avionics verification have completed stage tests, validating the projected Q3 2025 demonstration window.
+                            Awaiting synthesis…
                         </p>
                     </div>
                 </div>
@@ -326,134 +311,54 @@
             <div class="breakdown-section">
                 <div class="bd-head">
                     <span>NEWSROOM STANCE BREAKDOWN</span>
-                    <span class="bd-parsed-count" id="bdParsedCount">14 Independent Feeds Parsed</span>
+                    <span class="bd-parsed-count" id="bdParsedCount">0 Sources Evaluated</span>
                 </div>
                 <div class="bd-bar">
-                    <div class="bd-seg-support" id="bdSegSupport" style="width: 82%;"></div>
-                    <div class="bd-seg-neutral" id="bdSegNeutral" style="width: 12%;"></div>
-                    <div class="bd-seg-contra"  id="bdSegContra"  style="width: 6%;"></div>
+                    <div class="bd-seg-support" id="bdSegSupport" style="width: 0%;"></div>
+                    <div class="bd-seg-neutral" id="bdSegNeutral" style="width: 0%;"></div>
+                    <div class="bd-seg-contra"  id="bdSegContra"  style="width: 0%;"></div>
                 </div>
                 <div class="bd-legend">
                     <div class="bd-leg-item">
                         <span class="bd-dot support"></span>
-                        <span>Supporting Wires: <strong id="cntSupport">11 Wires (82%)</strong></span>
+                        <span>Supporting Sources: <strong id="cntSupport">0</strong></span>
                     </div>
                     <div class="bd-leg-item">
                         <span class="bd-dot neutral"></span>
-                        <span>Contextual / Neutral: <strong id="cntNeutral">2 Wires (12%)</strong></span>
+                        <span>Contextual / Neutral: <strong id="cntNeutral">0</strong></span>
                     </div>
                     <div class="bd-leg-item">
                         <span class="bd-dot contra"></span>
-                        <span>Contradicting Wires: <strong id="cntContra">1 Wire (6%)</strong></span>
+                        <span>Contradicting Sources: <strong id="cntContra">0</strong></span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ACCREDITED NEWSROOM DISPATCHES (TIER-1 SOURCES GRID) -->
-        <section class="dispatches-section" id="dispatchesGrid">
+        <!-- ACCREDITED NEWSROOM DISPATCHES (Hidden initially, populated dynamically) -->
+        <section class="dispatches-section hidden" id="dispatchesGrid">
             <div class="disp-head-bar">
                 <span class="disp-title">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
-                    ACCREDITED NEWSROOM DISPATCHES (TIER-1 SOURCES)
+                    RETRIEVED NEWSROOM DISPATCHES &amp; CITATIONS
                 </span>
                 <span class="crypto-verify-tag">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    Cryptographic Feed Verification ✓
+                    Real-time Wire Retrieval ✓
                 </span>
             </div>
 
-            <div class="disp-grid" id="dispatchesList">
-                <!-- Card 1 -->
-                <div class="wire-card">
-                    <div>
-                        <div class="wc-top">
-                            <div>
-                                <div class="wc-outlet-name">REUTERS</div>
-                                <div class="wc-bureau">Bengaluru Bureau</div>
-                            </div>
-                            <span class="wc-badge support">● Direct Corroboration</span>
-                        </div>
-                        <div class="wc-quote">"ISRO Chairman confirmed uncrewed test vehicle assembly has entered final integration phase targeting late third quarter."</div>
-                    </div>
-                    <div class="wc-bottom">
-                        <span class="wc-time">Published 42 mins ago</span>
-                        <a href="https://reuters.com" target="_blank" rel="noopener" class="wc-link">
-                            Inspect Wire Dispatch ↗
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Card 2 -->
-                <div class="wire-card">
-                    <div>
-                        <div class="wc-top">
-                            <div>
-                                <div class="wc-outlet-name">BBC NEWS</div>
-                                <div class="wc-bureau">Asia Tech Desk</div>
-                            </div>
-                            <span class="wc-badge support">● Direct Corroboration</span>
-                        </div>
-                        <div class="wc-quote">"Space commission files reveal human-rating benchmarks for the CE-20 cryogenic engine have cleared ambient pressure trials."</div>
-                    </div>
-                    <div class="wc-bottom">
-                        <span class="wc-time">Published 1 hour ago</span>
-                        <a href="https://bbc.com/news" target="_blank" rel="noopener" class="wc-link">
-                            Inspect Wire Dispatch ↗
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="wire-card">
-                    <div>
-                        <div class="wc-top">
-                            <div>
-                                <div class="wc-outlet-name">THE HINDU</div>
-                                <div class="wc-bureau">National Bureau</div>
-                            </div>
-                            <span class="wc-badge support">● Official Briefing</span>
-                        </div>
-                        <div class="wc-quote">"Department of Space gazette notification acknowledges hardware delivery timelines aligned with Q3 demonstration mission."</div>
-                    </div>
-                    <div class="wc-bottom">
-                        <span class="wc-time">Published 2 hours ago</span>
-                        <a href="https://thehindu.com" target="_blank" rel="noopener" class="wc-link">
-                            Inspect Wire Dispatch ↗
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Card 4 -->
-                <div class="wire-card">
-                    <div>
-                        <div class="wc-top">
-                            <div>
-                                <div class="wc-outlet-name">TIMES OF INDIA</div>
-                                <div class="wc-bureau">Space Corresp.</div>
-                            </div>
-                            <span class="wc-badge neutral">● Contextual Qualifier</span>
-                        </div>
-                        <div class="wc-quote">"Schedule depends upon monsoon ocean recovery sea trials planned with Indian Navy units off the Andhra coastline."</div>
-                    </div>
-                    <div class="wc-bottom">
-                        <span class="wc-time">Published 3 hours ago</span>
-                        <a href="https://timesofindia.indiatimes.com" target="_blank" rel="noopener" class="wc-link">
-                            Inspect Wire Dispatch ↗
-                        </a>
-                    </div>
-                </div>
-            </div>
+            <div class="disp-grid" id="dispatchesList"></div>
         </section>
 
         <!-- INSTITUTIONAL SCOPE & DISCLAIMERS -->
-        <section class="scope-card">
+        <section class="scope-card" id="scopeSection">
             <div class="scope-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             </div>
             <div class="scope-content">
                 <strong>INSTITUTIONAL SCOPE &amp; DISCLAIMERS</strong>
-                <p>VerifyNews ingests newsroom wire outputs across English, Hindi, Tamil, Bengali, and Telugu. Syndication redundancies are deduplicated via vector clustering. Breaking developing events under 5 minutes old reflect an "UNVERIFIED (Indexing)" status until multiple tier-1 desks confirm operative facts.</p>
+                <p>VerifyNews ingests newsroom wire outputs across domestic and international publishers (The Hindu, Indian Express, Times of India, BBC, Reuters, AP). Syndication redundancies are deduplicated via semantic vector clustering. Developing events under 10 minutes old may reflect an "UNVERIFIED" status until multiple accredited desks confirm operative facts.</p>
             </div>
         </section>
 
@@ -473,12 +378,12 @@
                     </div>
                 </div>
 
-                <div class="footer-feeds">
+                <div class="footer-feeds" id="footerFeeds">
                     <span class="feeds-label">INGESTION FEEDS:</span>
                     <span class="feed-chip">Reuters</span>
                     <span class="feed-chip">BBC News</span>
                     <span class="feed-chip">The Hindu</span>
-                    <span class="feed-chip">Associated Press</span>
+                    <span class="feed-chip">Indian Express</span>
                     <span class="feed-chip">Times of India</span>
                 </div>
             </div>

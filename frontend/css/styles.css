@@ -1388,6 +1388,11 @@ input, textarea {
     transform: translateX(-50%) translateY(0);
 }
 
+/* ── Utilities ────────────────────────────────────────────────── */
+.hidden {
+    display: none !important;
+}
+
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 900px) {
     .radar-grid { grid-template-columns: repeat(3, 1fr); }
