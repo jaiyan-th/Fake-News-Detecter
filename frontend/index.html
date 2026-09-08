@@ -3,263 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VerifyNews — Autonomous Multilateral Intelligence Network</title>
-    <meta name="description" content="Institutional-grade, real-time forensic cross-examination of breaking assertions and syndicate cables against tier-1 global investigative desks.">
+    <title>VerifyNews — AI News &amp; Fact Verification</title>
+    <meta name="description" content="Verify whether news claims and articles are true, false, or misleading using real-time search, Semantic Vector RAG, and Groq LLM.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="static/css/styles.css">
 </head>
 <body>
-    <!-- Ambient Light Mesh -->
+    <!-- Ambient Background -->
     <div class="ambient-bg"></div>
 
-    <!-- ── TOP NAVIGATION BAR ── -->
+    <!-- Top Navigation Bar -->
     <nav class="topnav" id="topnav">
         <div class="nav-inner">
-            <!-- Brand -->
             <div class="brand-block">
                 <div class="brand-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 </div>
                 <div class="brand-title-wrap">
                     <span class="brand-title">Verify<span>News</span></span>
-                    <span class="brand-sub">AUTONOMOUS INTELLIGENCE</span>
+                    <span class="brand-sub">FACT VERIFICATION ENGINE</span>
                 </div>
             </div>
 
-            <!-- Center -->
             <div class="nav-center desktop-only">
                 <div class="live-feed-pill">
                     <span class="pulsing-dot"></span>
-                    Live Neural Wire RAG · 14 Feeds Active
-                </div>
-                <div class="nav-links">
-                    <a href="#inputCard">Live Wire Stream</a>
-                    <a href="#scopeSection">Methodology</a>
-                    <a href="#footerFeeds">API &amp; Newsrooms</a>
+                    Live Newsrooms Search Active
                 </div>
             </div>
 
-            <!-- Right -->
             <div class="nav-right">
-                <button class="nav-btn-history" onclick="toggleHistoryDrawer()" id="btnHistoryNav" title="View Verification History">
+                <button class="nav-btn-history" onclick="toggleHistoryDrawer()" id="btnHistoryNav" title="View History">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     History <span id="histBadge" style="margin-left:2px;">0</span>
                 </button>
                 <button class="btn-signin" onclick="openAuthModal('login')" id="btnSignIn">Sign In</button>
-                <button class="user-avatar-btn" onclick="openProfileModal()" title="User Profile">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                </button>
             </div>
         </div>
     </nav>
 
-    <!-- ── MAIN PAGE CONTENT ── -->
+    <!-- Main Content -->
     <main class="app-container">
 
-        <!-- HERO SECTION -->
+        <!-- Hero -->
         <section class="hero">
-            <div class="eyebrow-badge">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z"/></svg>
-                MULTILATERAL NEURAL CROSS-EXAMINATION
-                <span class="eyebrow-tag">LLaMA-3.3 + FastEmbed</span>
-            </div>
             <h1 class="hero-title">
                 Don't just read the news.<br>
-                <span class="hero-title-blue">Verify truth in live motion.</span>
+                <span class="hero-title-blue">Verify it with live sources.</span>
             </h1>
             <p class="hero-subtitle">
-                Institutional-grade, real-time forensic cross-examination of breaking assertions and syndicate cables against tier-1 global investigative desks.
+                Paste any news headline, statement, or article URL. We search real-time global newsrooms and cross-examine evidence with AI.
             </p>
-
-            <!-- Quick Intelligence Samples -->
-            <div class="dossiers-wrap">
-                <span class="dossiers-label">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                    HOT INTELLIGENCE DOSSIERS
-                </span>
-                <div class="dossiers-grid">
-                    <button class="dossier-pill" onclick="loadSampleText('ISRO announces final uncrewed orbital flight test for Gaganyaan mission scheduled for Q3 2025 with human-rated LVM3.')">
-                        🚀 ISRO Gaganyaan 2025 Launch
-                    </button>
-                    <button class="dossier-pill" onclick="loadSampleText('Reserve Bank of India officially mandates all Indian commercial banks to adopt digital rupee offline transactions.')">
-                        🏦 RBI Digital Rupee Offline Wallet
-                    </button>
-                    <button class="dossier-pill" onclick="loadSampleUrl('https://www.newindianexpress.com/states/tamil-nadu/2026/Sep/02/tn-cm-vijay-announces-withdrawal-of-cases-against-farmers-teachers-over-protests-from-2021-26')">
-                        📰 TN CM Vijay Protest Cases
-                    </button>
-                    <button class="dossier-pill" onclick="loadSampleText('World Health Organization declares complete international eradication of wild poliovirus transmission.')">
-                        🌐 WHO Global Accord
-                    </button>
-                </div>
-            </div>
         </section>
 
-        <!-- DUAL-MODE INPUT CARD -->
+        <!-- Analysis Card (Text & URL) -->
         <section class="input-card" id="inputCard">
             <div class="input-top-bar">
                 <div class="input-tabs">
-                    <button class="tab-btn" id="tabUrl" onclick="switchMode('url')">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                        Wire URL Ingestion
-                    </button>
                     <button class="tab-btn active" id="tabText" onclick="switchMode('text')">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                        Assertion &amp; Claim Dossier
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        Text Analysis
+                    </button>
+                    <button class="tab-btn" id="tabUrl" onclick="switchMode('url')">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        URL Analysis
                     </button>
                 </div>
                 <div class="input-utilities">
-                    <button class="util-link" onclick="pasteSampleToCurrent()">
+                    <button class="util-link" onclick="pasteFromClipboard()">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                         Paste
                     </button>
-                    <button class="util-link" onclick="clearCurrentInput()">
+                    <button class="util-link" onclick="clearActiveInput()">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                         Clear
                     </button>
                 </div>
             </div>
 
-            <!-- Text Panel -->
+            <!-- Text Analysis Panel -->
             <div class="input-field-block" id="panelText">
                 <div class="input-meta-head">
                     <span class="field-title-dot">
                         <span class="dot-indicator"></span>
-                        CORE ASSERTION OR OPERATIONAL HEADLINE
+                        NEWS STATEMENT OR CLAIM TEXT
                     </span>
                     <span class="char-counter" id="charCounter">0 / 500 characters</span>
                 </div>
-                <textarea class="main-textarea" id="inputText" rows="3" placeholder="Enter breaking news statement, syndicate wire claim, or report excerpt to cross-verify across live newsrooms..." oninput="updateCharCounter()"></textarea>
+                <textarea class="main-textarea" id="inputText" rows="4" placeholder="Type or paste the news headline, claim, or viral forward you want to verify..." oninput="updateCharCounter()"></textarea>
             </div>
 
-            <!-- URL Panel -->
+            <!-- URL Analysis Panel -->
             <div class="input-field-block hidden" id="panelUrl">
                 <div class="input-meta-head">
                     <span class="field-title-dot">
                         <span class="dot-indicator"></span>
-                        WIRE DISPATCH / ARTICLE URL
+                        NEWS ARTICLE URL
                     </span>
-                    <span class="char-counter">Direct Webhook Extractor</span>
+                    <span class="char-counter">Article Content Extractor</span>
                 </div>
-                <input type="url" class="main-input-url" id="inputUrl" placeholder="https://timesofindia.indiatimes.com/... or indianexpress.com/..." autocomplete="off">
+                <input type="url" class="main-input-url" id="inputUrl" placeholder="https://timesofindia.indiatimes.com/... or https://bbc.com/news/..." autocomplete="off">
             </div>
 
             <div class="input-bottom-bar">
                 <div class="ref-indicator">
                     <span class="ref-dot"></span>
-                    Cross-referencing live newsrooms (The Hindu, Indian Express, TOI, Reuters, BBC)
+                    Searches live verified newsrooms (The Hindu, Indian Express, Times of India, BBC, Reuters)
                 </div>
-                <button class="cta-execute" id="verifyBtn" onclick="executeVerification()">
+                <button class="cta-execute" id="verifyBtn" onclick="runAnalysis()">
                     <span id="ctaBtnIcon">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                     </span>
-                    <span id="ctaBtnText">Execute Neural Cross-Examination</span>
+                    <span id="ctaBtnText">Verify Claim</span>
                 </button>
             </div>
         </section>
 
-        <!-- 6-STEP AUTONOMOUS PIPELINE PROGRESS RADAR (Hidden initially) -->
-        <section class="pipeline-radar-card hidden" id="pipelineRadar">
+        <!-- Loading / Progress Indicator (Hidden initially) -->
+        <section class="pipeline-radar-card hidden" id="loadingRadar">
             <div class="radar-header">
                 <div class="radar-title-group">
                     <span class="radar-title">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
-                        AUTONOMOUS PIPELINE PROGRESS RADAR
+                        ANALYSIS IN PROGRESS
                     </span>
-                    <span class="badge-autosync">LIVE SYNC</span>
+                    <span class="badge-autosync">LIVE</span>
                 </div>
                 <div class="radar-stats">
                     <span class="pulsing-dot"></span>
-                    <span id="radarLatency">Pipeline: Running…</span> · <span id="radarSources">Evaluating Live Feeds</span>
+                    <span id="radarStatusText">Cross-referencing live news sources…</span>
                 </div>
             </div>
 
             <div class="radar-grid">
-                <div class="radar-step" id="rstep-1">
+                <div class="radar-step" id="step-1">
                     <div class="step-check-circle">1</div>
-                    <div class="step-text">
-                        <span class="step-name">1. Ingest</span>
-                        <span class="step-detail">Content Sanitized</span>
-                    </div>
+                    <div class="step-text"><span class="step-name">Content Ingestion</span></div>
                 </div>
-                <div class="radar-step" id="rstep-2">
+                <div class="radar-step" id="step-2">
                     <div class="step-check-circle">2</div>
-                    <div class="step-text">
-                        <span class="step-name">2. Extract</span>
-                        <span class="step-detail" id="rstepEntityCount">Claims &amp; Entities</span>
-                    </div>
+                    <div class="step-text"><span class="step-name">Claim Extraction</span></div>
                 </div>
-                <div class="radar-step" id="rstep-3">
+                <div class="radar-step" id="step-3">
                     <div class="step-check-circle">3</div>
-                    <div class="step-text">
-                        <span class="step-name">3. Search</span>
-                        <span class="step-detail">Live News &amp; RSS</span>
-                    </div>
+                    <div class="step-text"><span class="step-name">Live News Search</span></div>
                 </div>
-                <div class="radar-step" id="rstep-4">
+                <div class="radar-step" id="step-4">
                     <div class="step-check-circle">4</div>
-                    <div class="step-text">
-                        <span class="step-name">4. FastEmbed</span>
-                        <span class="step-detail">Vector RAG Cosine</span>
-                    </div>
+                    <div class="step-text"><span class="step-name">Vector RAG Retrieval</span></div>
                 </div>
-                <div class="radar-step" id="rstep-5">
+                <div class="radar-step" id="step-5">
                     <div class="step-check-circle">5</div>
-                    <div class="step-text">
-                        <span class="step-name">5. Stance LLM</span>
-                        <span class="step-detail">Groq LLaMA-3.3</span>
-                    </div>
+                    <div class="step-text"><span class="step-name">Evidence Stance Analysis</span></div>
                 </div>
-                <div class="radar-step final" id="rstep-6">
+                <div class="radar-step" id="step-6">
                     <div class="step-check-circle">6</div>
-                    <div class="step-text">
-                        <span class="step-name">6. Synthesis</span>
-                        <span class="step-detail" id="rstepConsensus">Grounded Verdict</span>
-                    </div>
+                    <div class="step-text"><span class="step-name">Verdict Synthesis</span></div>
                 </div>
             </div>
         </section>
 
-        <!-- MULTILATERAL VERDICT DOCKET (Hidden initially, populated dynamically) -->
-        <section class="docket-card hidden" id="verdictDocket">
-            <!-- Header Bar -->
-            <div class="docket-head-bar">
-                <div class="docket-head-left">
-                    <h2>
-                        Multilateral Verdict Docket
-                        <span class="docket-number-tag" id="docketTag">LIVE DOCKET</span>
-                    </h2>
-                    <p class="docket-sub">Cross-examination stance synthesis across accredited wire feeds and verified newsrooms</p>
-                </div>
-            </div>
-
+        <!-- Real Analysis Results (Hidden initially, completely populated by live API) -->
+        <section class="docket-card hidden" id="resultsSection">
             <!-- Banner -->
-            <div class="verdict-banner real" id="verdictBanner">
+            <div class="verdict-banner" id="verdictBanner">
                 <div class="vb-left">
-                    <div class="vb-icon" id="vbIcon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                    </div>
+                    <div class="vb-icon" id="vbIcon"></div>
                     <div>
-                        <div class="vb-title" id="vbTitle">VERIFIED FACT</div>
-                        <div class="vb-desc" id="vbDesc">Corroborated across live accredited journalistic newsrooms</div>
+                        <div class="vb-title" id="vbTitle">VERDICT</div>
+                        <div class="vb-desc" id="vbDesc">Evaluation based on live newsroom evidence</div>
                     </div>
                 </div>
                 <div class="vb-actions">
-                    <button class="vb-tool-btn" onclick="copyDocketSummary()">
+                    <button class="vb-tool-btn" onclick="copyReport()">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                        Copy Docket
+                        Copy Report
                     </button>
                     <button class="vb-tool-btn" onclick="window.print()">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                        Export PDF
+                        Print
                     </button>
                 </div>
             </div>
 
-            <!-- Two Column Body -->
+            <!-- Two-Column Analysis Body -->
             <div class="docket-grid">
-                <!-- Column 1: Gauge -->
+                <!-- Confidence Dial -->
                 <div class="docket-col-gauge">
                     <div class="gauge-circle-wrap">
                         <svg class="gauge-svg" viewBox="0 0 140 140">
@@ -267,42 +198,37 @@
                             <circle class="gauge-bar-circle" id="gaugeBar" cx="70" cy="70" r="55" stroke-dasharray="345.5" stroke-dashoffset="34.5"></circle>
                         </svg>
                         <div class="gauge-inner-text">
-                            <span class="gauge-val" id="gaugeVal">90%</span>
+                            <span class="gauge-val" id="gaugeVal">0%</span>
                             <span class="gauge-tag" id="gaugeTag">CONFIDENCE</span>
                         </div>
                     </div>
-                    <div class="gauge-info-title">Multilateral Stance Index</div>
-                    <p class="gauge-info-sub">Calculated via FastEmbed vector distance &amp; newsroom consensus.</p>
+                    <div class="gauge-info-title">Confidence Rating</div>
+                    <p class="gauge-info-sub">Calculated via multi-source semantic cosine alignment.</p>
                 </div>
 
-                <!-- Column 2: Extracted Assertion & Entity Graph -->
+                <!-- Claim & Synthesis Details -->
                 <div class="docket-col-details">
                     <div class="sec-tag">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
-                        EXTRACTED CORE ASSERTION
+                        EXTRACTED CORE CLAIM
                     </div>
-                    <div class="assertion-headline" id="assertionText">
-                        "…"
-                    </div>
+                    <div class="assertion-headline" id="claimHeadline"></div>
 
-                    <!-- Forensic Entity Graph -->
-                    <div class="entity-graph-wrap">
-                        <div class="entity-graph-label">FORENSIC ENTITY GRAPH:</div>
+                    <!-- Entity Graph -->
+                    <div class="entity-graph-wrap" id="entitySection">
+                        <div class="entity-graph-label">IDENTIFIED ENTITIES:</div>
                         <div class="entity-pills-row" id="entityPillsRow"></div>
                     </div>
 
-                    <!-- Editorial RAG Synthesis -->
+                    <!-- Synthesis Callout -->
                     <div class="synthesis-card">
                         <div class="syn-head">
                             <span class="sec-tag" style="margin-bottom:0;">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                                EDITORIAL RAG SYNTHESIS
+                                EVIDENCE SYNTHESIS &amp; ANALYSIS
                             </span>
-                            <span class="syn-tag-badge">Groq LLaMA-3.3-70B</span>
                         </div>
-                        <p class="syn-text" id="synthesisText">
-                            Awaiting synthesis…
-                        </p>
+                        <p class="syn-text" id="synthesisText"></p>
                     </div>
                 </div>
             </div>
@@ -310,8 +236,8 @@
             <!-- Stance Breakdown -->
             <div class="breakdown-section">
                 <div class="bd-head">
-                    <span>NEWSROOM STANCE BREAKDOWN</span>
-                    <span class="bd-parsed-count" id="bdParsedCount">0 Sources Evaluated</span>
+                    <span>EVIDENCE AGREEMENT BREAKDOWN</span>
+                    <span class="bd-parsed-count" id="bdParsedCount">0 Sources</span>
                 </div>
                 <div class="bd-bar">
                     <div class="bd-seg-support" id="bdSegSupport" style="width: 0%;"></div>
@@ -321,50 +247,39 @@
                 <div class="bd-legend">
                     <div class="bd-leg-item">
                         <span class="bd-dot support"></span>
-                        <span>Supporting Sources: <strong id="cntSupport">0</strong></span>
+                        <span>Supporting: <strong id="cntSupport">0</strong></span>
                     </div>
                     <div class="bd-leg-item">
                         <span class="bd-dot neutral"></span>
-                        <span>Contextual / Neutral: <strong id="cntNeutral">0</strong></span>
+                        <span>Neutral / Context: <strong id="cntNeutral">0</strong></span>
                     </div>
                     <div class="bd-leg-item">
                         <span class="bd-dot contra"></span>
-                        <span>Contradicting Sources: <strong id="cntContra">0</strong></span>
+                        <span>Contradicting: <strong id="cntContra">0</strong></span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ACCREDITED NEWSROOM DISPATCHES (Hidden initially, populated dynamically) -->
-        <section class="dispatches-section hidden" id="dispatchesGrid">
+        <!-- Real Dispatches Section (Hidden initially, populated by live API) -->
+        <section class="dispatches-section hidden" id="sourcesSection">
             <div class="disp-head-bar">
                 <span class="disp-title">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
-                    RETRIEVED NEWSROOM DISPATCHES &amp; CITATIONS
+                    RETRIEVED EVIDENCE SOURCES
                 </span>
                 <span class="crypto-verify-tag">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    Real-time Wire Retrieval ✓
+                    Live Sources Verified
                 </span>
             </div>
 
-            <div class="disp-grid" id="dispatchesList"></div>
-        </section>
-
-        <!-- INSTITUTIONAL SCOPE & DISCLAIMERS -->
-        <section class="scope-card" id="scopeSection">
-            <div class="scope-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            </div>
-            <div class="scope-content">
-                <strong>INSTITUTIONAL SCOPE &amp; DISCLAIMERS</strong>
-                <p>VerifyNews ingests newsroom wire outputs across domestic and international publishers (The Hindu, Indian Express, Times of India, BBC, Reuters, AP). Syndication redundancies are deduplicated via semantic vector clustering. Developing events under 10 minutes old may reflect an "UNVERIFIED" status until multiple accredited desks confirm operative facts.</p>
-            </div>
+            <div class="disp-grid" id="sourcesList"></div>
         </section>
 
     </main>
 
-    <!-- ── INSTITUTIONAL FOOTER ── -->
+    <!-- Footer -->
     <footer class="institutional-footer">
         <div class="footer-inner">
             <div class="footer-top">
@@ -373,38 +288,27 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     </div>
                     <div class="fb-text">
-                        <h4>VerifyNews Intelligence Network</h4>
-                        <span>Cryptographic cross-examination protocol</span>
+                        <h4>VerifyNews Engine</h4>
+                        <span>Real-Time Newsroom Fact Verification</span>
                     </div>
                 </div>
-
-                <div class="footer-feeds" id="footerFeeds">
-                    <span class="feeds-label">INGESTION FEEDS:</span>
-                    <span class="feed-chip">Reuters</span>
-                    <span class="feed-chip">BBC News</span>
+                <div class="footer-feeds">
+                    <span class="feeds-label">NEWSROOM INDEXES:</span>
                     <span class="feed-chip">The Hindu</span>
                     <span class="feed-chip">Indian Express</span>
                     <span class="feed-chip">Times of India</span>
+                    <span class="feed-chip">BBC News</span>
+                    <span class="feed-chip">Reuters</span>
                 </div>
             </div>
-
             <div class="footer-bottom">
-                <div class="protocol-status">
-                    <span class="ref-dot"></span>
-                    Autonomous Verification Protocol v2.4 - Operational
-                </div>
-                <div class="footer-links">
-                    <a href="#">Auditing Protocol</a>
-                    <a href="#">API Documentation</a>
-                    <a href="#">Privacy Framework</a>
-                    <a href="#">Terms of Service</a>
-                </div>
-                <div>© 2025 VerifyNews Intelligence Group Inc. All rights reserved.</div>
+                <div>Powered by Groq LLaMA-3.3 · FastEmbed Vector RAG · Google News RSS &amp; NewsAPI</div>
+                <div>© VerifyNews. All rights reserved.</div>
             </div>
         </div>
     </footer>
 
-    <!-- Toast Feedback -->
+    <!-- Toast Notification -->
     <div class="toast-msg" id="toastMsg">Action Completed</div>
 
     <!-- Scripts -->

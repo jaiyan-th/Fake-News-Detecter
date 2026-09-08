@@ -1,54 +1,37 @@
 /**
- * VerifyNews Intelligence Network — Live Client
- * Clean Home Page with Real Text & URL Cross-Examination
- * Zero mock data — 100% Live Backend Integration
+ * VerifyNews Engine — Live Client
+ * Text Analysis & URL Analysis Alone
+ * Zero mock data — 100% Live Backend
  */
 
-// ── State ───────────────────────────────────────────────────────
-
-let activeInputMode = 'text';
-let currentDocketData = null;
-let token = localStorage.getItem('vn_token') || null;
-let user = null;
-try { user = JSON.parse(localStorage.getItem('vn_user')); } catch { user = null; }
-
-// ── Init ────────────────────────────────────────────────────────
+let activeMode = 'text';
+let lastResult = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     updateCharCounter();
-    syncAuthUI();
 });
-
-function syncAuthUI() {
-    const signInBtn = document.getElementById('btnSignIn');
-    if (token && user) {
-        if (signInBtn) signInBtn.textContent = user.full_name ? user.full_name.split(' ')[0] : 'Account';
-        const badge = document.getElementById('histBadge');
-        if (badge) badge.textContent = user.total_verifications || 0;
-    } else {
-        if (signInBtn) signInBtn.textContent = 'Sign In';
-    }
-}
 
 // ── Mode Switch ─────────────────────────────────────────────────
 
 function switchMode(mode) {
-    activeInputMode = mode;
-    const tabUrl = document.getElementById('tabUrl');
+    activeMode = mode;
     const tabText = document.getElementById('tabText');
-    const panelUrl = document.getElementById('panelUrl');
+    const tabUrl = document.getElementById('tabUrl');
     const panelText = document.getElementById('panelText');
+    const panelUrl = document.getElementById('panelUrl');
 
     if (mode === 'url') {
         tabUrl.classList.add('active');
         tabText.classList.remove('active');
         panelUrl.classList.remove('hidden');
         panelText.classList.add('hidden');
+        document.getElementById('inputUrl').focus();
     } else {
         tabText.classList.add('active');
         tabUrl.classList.remove('active');
         panelText.classList.remove('hidden');
         panelUrl.classList.add('hidden');
+        document.getElementById('inputText').focus();
     }
 }
 
@@ -56,13 +39,12 @@ function updateCharCounter() {
     const textEl = document.getElementById('inputText');
     const counterEl = document.getElementById('charCounter');
     if (textEl && counterEl) {
-        const len = textEl.value.length;
-        counterEl.textContent = `${len} / 500 characters`;
+        counterEl.textContent = `${textEl.value.length} / 500 characters`;
     }
 }
 
-function clearCurrentInput() {
-    if (activeInputMode === 'url') {
+function clearActiveInput() {
+    if (activeMode === 'url') {
         const u = document.getElementById('inputUrl');
         if (u) { u.value = ''; u.focus(); }
     } else {
@@ -72,14 +54,14 @@ function clearCurrentInput() {
     showToast('Input cleared');
 }
 
-async function pasteSampleToCurrent() {
+async function pasteFromClipboard() {
     try {
-        const clipboard = await navigator.clipboard.readText();
-        if (clipboard) {
-            if (activeInputMode === 'url') {
-                document.getElementById('inputUrl').value = clipboard;
+        const text = await navigator.clipboard.readText();
+        if (text) {
+            if (activeMode === 'url') {
+                document.getElementById('inputUrl').value = text;
             } else {
-                document.getElementById('inputText').value = clipboard;
+                document.getElementById('inputText').value = text;
                 updateCharCounter();
             }
             showToast('Pasted from clipboard');
@@ -89,115 +71,94 @@ async function pasteSampleToCurrent() {
     }
 }
 
-// ── Sample Fill Helpers (Pure Input Helpers, No Mock Results) ──
+// ── Run Analysis ────────────────────────────────────────────────
 
-function loadSampleText(claim) {
-    switchMode('text');
-    const txt = document.getElementById('inputText');
-    txt.value = claim;
-    updateCharCounter();
-    txt.focus();
-    showToast('Claim loaded into input. Click Execute to analyze.');
-}
-
-function loadSampleUrl(url) {
-    switchMode('url');
-    const u = document.getElementById('inputUrl');
-    u.value = url;
-    u.focus();
-    showToast('URL loaded into input. Click Execute to analyze.');
-}
-
-// ── Live Neural Verification Execution ──────────────────────────
-
-async function executeVerification() {
+async function runAnalysis() {
     let payload = {};
-    if (activeInputMode === 'url') {
-        const urlVal = document.getElementById('inputUrl').value.trim();
-        if (!urlVal) {
-            showToast('Please enter an article or wire URL');
+
+    if (activeMode === 'url') {
+        const url = document.getElementById('inputUrl').value.trim();
+        if (!url) {
+            showToast('Please enter an article URL');
             document.getElementById('inputUrl').focus();
             return;
         }
-        payload = { url: urlVal };
+        payload = { url };
     } else {
-        const textVal = document.getElementById('inputText').value.trim();
-        if (!textVal || textVal.length < 15) {
-            showToast('Please enter a statement of at least 15 characters');
+        const text = document.getElementById('inputText').value.trim();
+        if (!text || text.length < 15) {
+            showToast('Please enter at least 15 characters of news text');
             document.getElementById('inputText').focus();
             return;
         }
-        payload = { text: textVal };
+        payload = { text };
     }
 
     const btn = document.getElementById('verifyBtn');
     const ctaText = document.getElementById('ctaBtnText');
     const ctaIcon = document.getElementById('ctaBtnIcon');
-    const radar = document.getElementById('pipelineRadar');
-    const docket = document.getElementById('verdictDocket');
-    const dispatches = document.getElementById('dispatchesGrid');
+    const radar = document.getElementById('loadingRadar');
+    const results = document.getElementById('resultsSection');
+    const sources = document.getElementById('sourcesSection');
 
+    // UI loading state
     btn.disabled = true;
-    ctaText.textContent = 'Neural Cross-Examining Feeds…';
+    ctaText.textContent = 'Analyzing…';
     ctaIcon.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
 
-    // Show pipeline progress
     radar.classList.remove('hidden');
-    docket.classList.add('hidden');
-    dispatches.classList.add('hidden');
-    resetRadarSteps();
-    animateRadarSteps();
+    results.classList.add('hidden');
+    sources.classList.add('hidden');
 
-    const startTime = Date.now();
+    resetSteps();
+    animateSteps();
 
     try {
-        const headers = { 'Content-Type': 'application/json' };
-        if (token) headers.Authorization = `Bearer ${token}`;
-
         const res = await fetch('/api/v1/verify', {
             method: 'POST',
-            headers,
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
-        const elapsed = Date.now() - startTime;
-        document.getElementById('radarLatency').textContent = `Pipeline: ${elapsed}ms`;
-
         if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.message || err.detail || 'Verification endpoint failed');
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.message || errData.detail || 'Verification request failed');
         }
 
         const data = await res.json();
-        renderLiveResults(data);
+        lastResult = data;
 
-        // Show docket and dispatches
-        docket.classList.remove('hidden');
-        dispatches.classList.remove('hidden');
-        docket.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        showToast('Verification analysis complete');
+        // Render real data
+        renderResults(data);
+
+        // Show results
+        results.classList.remove('hidden');
+        sources.classList.remove('hidden');
+        results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showToast('Analysis complete');
 
     } catch (err) {
         showToast(`Error: ${err.message}`);
     } finally {
         btn.disabled = false;
-        ctaText.textContent = 'Execute Neural Cross-Examination';
+        ctaText.textContent = 'Verify Claim';
         ctaIcon.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+        radar.classList.add('hidden');
     }
 }
 
-// ── Radar Steps Animation ───────────────────────────────────────
+// ── Progress Steps Animation ────────────────────────────────────
 
-function resetRadarSteps() {
+function resetSteps() {
     for (let i = 1; i <= 6; i++) {
-        const el = document.getElementById(`rstep-${i}`);
+        const el = document.getElementById(`step-${i}`);
         if (el) el.classList.remove('done');
     }
 }
 
-function animateRadarSteps() {
+function animateSteps() {
     for (let i = 1; i <= 6; i++) {
-        const el = document.getElementById(`rstep-${i}`);
+        const el = document.getElementById(`step-${i}`);
         if (el) {
             setTimeout(() => {
                 el.classList.add('done');
@@ -206,17 +167,11 @@ function animateRadarSteps() {
     }
 }
 
-// ── Render 100% Live Results ────────────────────────────────────
+// ── Render Live Results ─────────────────────────────────────────
 
-function renderLiveResults(data) {
-    currentDocketData = data;
-
+function renderResults(data) {
     const verdict = (data.verdict || 'UNVERIFIED').toUpperCase();
-    const conf = data.confidence || 50;
-
-    // Docket Tag
-    const tagEl = document.getElementById('docketTag');
-    if (tagEl) tagEl.textContent = `DOCKET #VM-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const conf = data.confidence || 0;
 
     // Banner
     const banner = document.getElementById('verdictBanner');
@@ -225,23 +180,23 @@ function renderLiveResults(data) {
     const vbIcon = document.getElementById('vbIcon');
 
     let vClass = 'unverified';
-    let titleText = 'UNVERIFIED INDEXING - INSUFFICIENT DISPATCHES';
-    let descText = 'No authoritative consensus records found across connected news feeds';
+    let titleText = 'UNVERIFIED CLAIM';
+    let descText = 'Insufficient authoritative reporting found across newsroom indexes';
 
     if (verdict === 'REAL') {
         vClass = 'real';
-        titleText = 'VERIFIED FACT - HIGH CONSENSUS';
-        descText = `Corroborated across ${data.sources?.length || 0} live journalistic newsroom reports`;
+        titleText = 'VERIFIED — REAL';
+        descText = `Corroborated by ${data.sources?.length || 0} live newsroom reports`;
         vbIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
     } else if (verdict === 'FALSE') {
         vClass = 'false';
-        titleText = 'REFUTED DISPATCH - FACTUALLY CONTRADICTED';
-        descText = 'Directly disproved by authoritative reports and consensus coverage';
+        titleText = 'DEBUNKED — FALSE';
+        descText = 'Directly disproved by authoritative reporting and statements';
         vbIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
     } else if (verdict === 'MISLEADING') {
         vClass = 'misleading';
-        titleText = 'MISLEADING CONTEXT - PARTIALLY SUBSTANTIATED';
-        descText = 'Core claim contains unverified or distorted specific assertions';
+        titleText = 'MISLEADING / PARTIALLY TRUE';
+        descText = 'Claim contains distorted, inaccurate, or missing context';
         vbIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
     } else {
         vbIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
@@ -251,14 +206,9 @@ function renderLiveResults(data) {
     vbTitle.textContent = titleText;
     vbDesc.textContent = descText;
 
-    // Gauge Circle
-    const gaugeVal = document.getElementById('gaugeVal');
+    // Confidence Dial
+    document.getElementById('gaugeVal').textContent = `${conf}%`;
     const gaugeBar = document.getElementById('gaugeBar');
-    const gaugeTag = document.getElementById('gaugeTag');
-
-    gaugeVal.textContent = `${conf}%`;
-    gaugeTag.textContent = verdict === 'REAL' ? 'CONSENSUS' : (verdict === 'FALSE' ? 'REFUTED' : 'CONFIDENCE');
-
     const circumference = 345.5;
     const offset = circumference - (circumference * conf / 100);
     gaugeBar.style.strokeDashoffset = offset;
@@ -268,64 +218,59 @@ function renderLiveResults(data) {
     else if (verdict === 'MISLEADING') gaugeBar.style.stroke = '#d97706';
     else gaugeBar.style.stroke = '#64748b';
 
-    // Extracted Assertion
-    const assertionText = data.claim?.primary_claim || document.getElementById('inputText').value;
-    document.getElementById('assertionText').textContent = `"${assertionText}"`;
+    // Extracted Claim
+    const claim = data.claim?.primary_claim || (activeMode === 'url' ? document.getElementById('inputUrl').value : document.getElementById('inputText').value);
+    document.getElementById('claimHeadline').textContent = `"${claim}"`;
 
-    // Forensic Entity Graph
-    const pillsRow = document.getElementById('entityPillsRow');
-    pillsRow.innerHTML = '';
+    // Entities
+    const entitySection = document.getElementById('entitySection');
+    const entityRow = document.getElementById('entityPillsRow');
+    entityRow.innerHTML = '';
     const entities = data.claim?.entities || [];
+
     if (entities.length > 0) {
-        entities.forEach((ent, idx) => {
-            const types = ['person', 'org', 'location', 'mission'];
+        entitySection.classList.remove('hidden');
+        entities.forEach(ent => {
             const span = document.createElement('span');
-            span.className = `entity-badge ${types[idx % types.length]}`;
-            span.textContent = `● ${ent}`;
-            pillsRow.appendChild(span);
+            span.className = 'entity-badge org';
+            span.textContent = ent;
+            entityRow.appendChild(span);
         });
     } else {
-        const span = document.createElement('span');
-        span.className = 'entity-badge org';
-        span.textContent = '● Multi-source entity extraction active';
-        pillsRow.appendChild(span);
+        entitySection.classList.add('hidden');
     }
 
-    // Editorial Synthesis
-    document.getElementById('synthesisText').innerHTML = data.explanation || 'Verification synthesis completed.';
+    // Synthesis
+    document.getElementById('synthesisText').textContent = data.explanation || 'No detailed analysis returned.';
 
-    // Breakdown Bar
+    // Breakdown
     const ev = data.evidence_summary || { supporting: 0, neutral: 0, contradicting: 0 };
-    const total = data.sources?.length || (ev.supporting + ev.neutral + ev.contradicting) || 1;
+    const total = (ev.supporting + ev.neutral + ev.contradicting) || 1;
     const sp = Math.round((ev.supporting / total) * 100);
     const cp = Math.round((ev.contradicting / total) * 100);
     const np = 100 - sp - cp;
 
     document.getElementById('bdSegSupport').style.width = `${sp}%`;
     document.getElementById('bdSegNeutral').style.width = `${np}%`;
-    document.getElementById('bdSegContra').style.width  = `${cp}%`;
+    document.getElementById('bdSegContra').style.width = `${cp}%`;
 
     document.getElementById('cntSupport').textContent = `${ev.supporting} (${sp}%)`;
     document.getElementById('cntNeutral').textContent = `${ev.neutral} (${np}%)`;
-    document.getElementById('cntContra').textContent  = `${ev.contradicting} (${cp}%)`;
-    document.getElementById('bdParsedCount').textContent = `${total} Live Sources Evaluated`;
+    document.getElementById('cntContra').textContent = `${ev.contradicting} (${cp}%)`;
+    document.getElementById('bdParsedCount').textContent = `${data.sources?.length || 0} Sources Evaluated`;
 
-    // Radar sources badge
-    document.getElementById('radarSources').textContent = `${total} Ingested Sources`;
-    document.getElementById('rstepConsensus').textContent = `${data.source_agreement_percentage || conf}% Agreement`;
-
-    // Real Sources Dispatches Grid
-    renderDispatchesGrid(data.sources || []);
+    // Evidence Sources Grid
+    renderSources(data.sources || []);
 }
 
-function renderDispatchesGrid(sources) {
-    const list = document.getElementById('dispatchesList');
+function renderSources(sources) {
+    const list = document.getElementById('sourcesList');
     list.innerHTML = '';
 
     if (!sources || sources.length === 0) {
         list.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align: center; padding: 36px 20px; background: #ffffff; border: 1px dashed var(--b); border-radius: 12px; color: var(--t3);">
-                No specific newsroom articles matched this claim query across live search indexes.
+            <div style="grid-column: 1 / -1; text-align: center; padding: 32px 20px; background: #ffffff; border: 1px dashed var(--b); border-radius: 12px; color: var(--t3);">
+                No matching newsroom articles were indexed for this specific query.
             </div>
         `;
         return;
@@ -336,23 +281,23 @@ function renderDispatchesGrid(sources) {
         card.className = 'wire-card';
 
         let stanceClass = 'neutral';
-        let stanceBadge = '● Contextual';
+        let stanceBadge = 'Neutral Context';
         if (src.stance === 'SUPPORT') {
             stanceClass = 'support';
-            stanceBadge = '● Direct Corroboration';
+            stanceBadge = 'Supports Claim';
         } else if (src.stance === 'CONTRADICT') {
             stanceClass = 'contra';
-            stanceBadge = '● Contradicting';
+            stanceBadge = 'Contradicts Claim';
         }
 
-        const dateStr = src.published_at ? new Date(src.published_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent Report';
+        const dateStr = src.published_at ? new Date(src.published_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent';
 
         card.innerHTML = `
             <div>
                 <div class="wc-top">
                     <div>
-                        <div class="wc-outlet-name">${esc(src.source_name || 'NEWS WIRE')}</div>
-                        <div class="wc-bureau">${esc(src.domain || 'Accredited Source')}</div>
+                        <div class="wc-outlet-name">${esc(src.source_name || 'News Source')}</div>
+                        <div class="wc-bureau">${esc(src.domain || '')}</div>
                     </div>
                     <span class="wc-badge ${stanceClass}">${stanceBadge}</span>
                 </div>
@@ -361,7 +306,7 @@ function renderDispatchesGrid(sources) {
             <div class="wc-bottom">
                 <span class="wc-time">${dateStr}</span>
                 <a href="${esc(src.url)}" target="_blank" rel="noopener" class="wc-link">
-                    Inspect Wire Dispatch ↗
+                    Read Article ↗
                 </a>
             </div>
         `;
@@ -369,21 +314,20 @@ function renderDispatchesGrid(sources) {
     });
 }
 
-// ── Copy Summary & Toast ────────────────────────────────────────
+// ── Copy Report & Toast ─────────────────────────────────────────
 
-function copyDocketSummary() {
-    if (!currentDocketData) return;
-    const d = currentDocketData;
-    const text = `VERIFYNEWS VERIFICATION REPORT
-Docket: ${document.getElementById('docketTag')?.textContent || ''}
+function copyReport() {
+    if (!lastResult) return;
+    const d = lastResult;
+    const text = `VERIFYNEWS FACT-CHECK REPORT
 Verdict: ${d.verdict} (${d.confidence}% Confidence)
-Claim: "${d.claim?.primary_claim || document.getElementById('inputText').value}"
-Synthesis: ${d.explanation || ''}
-Agreement: ${d.source_agreement_percentage || 0}%
+Claim: "${d.claim?.primary_claim || ''}"
+Analysis: ${d.explanation || ''}
+Source Agreement: ${d.source_agreement_percentage || 0}%
 Sources Evaluated: ${d.sources?.length || 0}`;
 
     navigator.clipboard.writeText(text).then(() => {
-        showToast('Docket copied to clipboard');
+        showToast('Report copied to clipboard');
     }).catch(() => {
         showToast('Copied');
     });
@@ -406,13 +350,10 @@ function esc(str) {
     return d.innerHTML;
 }
 
-// Navbar utilities
 function toggleHistoryDrawer() {
-    showToast('History drawer: 0 saved items');
+    showToast('History drawer: 0 items');
 }
+
 function openAuthModal(tab) {
     showToast('Authentication service online');
-}
-function openProfileModal() {
-    showToast('Autonomous agent session active');
 }
