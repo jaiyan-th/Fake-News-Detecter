@@ -1,7 +1,7 @@
 /**
- * VerifyNews — Observatory Theme — Frontend Client
- * Handles verification, JWT auth, history drawer, profile modal.
- * All API contracts remain identical to the backend.
+ * VerifyNews — Premium Executive White Theme — Frontend Client
+ * Handles verification, JWT auth, history drawer, profile modal, and UI utilities.
+ * All API contracts remain strictly aligned with the backend.
  */
 
 // ── State ───────────────────────────────────────────────────────
@@ -10,6 +10,7 @@ let activeMode = 'url';
 let allSources = [];
 let stanceFilter = 'ALL';
 let historyFilter = 'ALL';
+let lastVerificationData = null;
 
 let token = localStorage.getItem('vn_token') || null;
 let user = null;
@@ -20,6 +21,7 @@ try { user = JSON.parse(localStorage.getItem('vn_user')); } catch { user = null;
 document.addEventListener('DOMContentLoaded', () => {
     syncAuthUI();
     if (token) refreshMe();
+    updateCharCount();
 });
 
 // ── Auth UI Sync ────────────────────────────────────────────────
@@ -56,7 +58,7 @@ async function refreshMe() {
     } catch (e) { console.warn('refreshMe failed', e); }
 }
 
-// ── Mode Toggle ─────────────────────────────────────────────────
+// ── Mode Toggle & Inputs ────────────────────────────────────────
 
 function switchMode(mode) {
     activeMode = mode;
@@ -65,6 +67,66 @@ function switchMode(mode) {
     document.getElementById('panelUrl').classList.toggle('active', mode === 'url');
     document.getElementById('panelText').classList.toggle('active', mode === 'text');
     document.getElementById('modeSlider').classList.toggle('right', mode === 'text');
+}
+
+function updateCharCount() {
+    const txt = document.getElementById('inputText');
+    const counter = document.getElementById('textCharCounter');
+    if (txt && counter) {
+        counter.textContent = `${txt.value.length} chars`;
+    }
+}
+
+function clearInput(id) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.value = '';
+        el.focus();
+        updateCharCount();
+    }
+}
+
+async function pasteClipboardToInput(id) {
+    try {
+        const text = await navigator.clipboard.readText();
+        const el = document.getElementById(id);
+        if (el && text) {
+            el.value = text;
+            updateCharCount();
+            showToast('Pasted from clipboard');
+        }
+    } catch (err) {
+        showToast('Please press Ctrl+V to paste');
+    }
+}
+
+function fillSample(mode, content) {
+    switchMode(mode);
+    if (mode === 'url') {
+        const el = document.getElementById('inputUrl');
+        el.value = content;
+        el.focus();
+    } else {
+        const el = document.getElementById('inputText');
+        el.value = content;
+        updateCharCount();
+        el.focus();
+    }
+    showToast('Sample claim loaded. Click Verify.');
+}
+
+// ── Toast Feedback ──────────────────────────────────────────────
+
+let toastTimer = null;
+function showToast(msg) {
+    const toast = document.getElementById('toastMsg');
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2800);
 }
 
 // ── Error Helpers ───────────────────────────────────────────────
@@ -87,7 +149,8 @@ const STEP_IDS = ['ps-ingest', 'ps-claim', 'ps-search', 'ps-rag', 'ps-stance', '
 
 function markStep(index) {
     STEP_IDS.forEach((id, i) => {
-        document.getElementById(id).classList.toggle('done', i <= index);
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('done', i <= index);
     });
 }
 
@@ -100,11 +163,11 @@ async function startVerification() {
     let payload = {};
     if (activeMode === 'url') {
         const v = document.getElementById('inputUrl').value.trim();
-        if (!v) { showError('Input Required', 'Please paste a news article URL.'); return; }
+        if (!v) { showError('URL Required', 'Please paste a valid news article URL.'); return; }
         payload = { url: v };
     } else {
         const v = document.getElementById('inputText').value.trim();
-        if (!v || v.length < 20) { showError('Input Too Short', 'Paste at least one complete sentence (20+ chars).'); return; }
+        if (!v || v.length < 20) { showError('Input Too Short', 'Please paste at least one complete sentence or news statement (20+ characters).'); return; }
         payload = { text: v };
     }
 
@@ -114,7 +177,7 @@ async function startVerification() {
     const pipeline = document.getElementById('pipelineSection');
 
     btn.disabled = true;
-    ctaLabel.textContent = 'Investigating…';
+    ctaLabel.textContent = 'Cross-Examining Live Sources…';
     ctaIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
     pipeline.classList.remove('hidden');
     markStep(0);
@@ -136,15 +199,16 @@ async function startVerification() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || data.error || 'Verification failed');
 
+        lastVerificationData = data;
         renderResults(data);
         if (token) refreshMe();
 
     } catch (err) {
         clearInterval(ticker);
-        showError('Verification Failed', err.message || 'Could not reach backend.');
+        showError('Verification Failed', err.message || 'Could not reach backend service.');
     } finally {
         btn.disabled = false;
-        ctaLabel.textContent = 'Verify This Claim';
+        ctaLabel.textContent = 'Verify Claim Across Newsrooms';
         ctaIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
         pipeline.classList.add('hidden');
     }
@@ -154,11 +218,22 @@ async function startVerification() {
 
 function renderResults(data) {
     allSources = data.sources || [];
+    lastVerificationData = data;
 
-    // Verdict badge
+    // Verdict badge with visual indicator icon
     const badge = document.getElementById('vrBadge');
-    badge.textContent = data.verdict;
+    let iconSvg = '';
+    if (data.verdict === 'REAL') {
+        iconSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+    } else if (data.verdict === 'FALSE') {
+        iconSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    } else if (data.verdict === 'MISLEADING') {
+        iconSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    } else {
+        iconSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+    }
     badge.className = `vr-badge ${data.verdict}`;
+    badge.innerHTML = `${iconSvg} <span>${data.verdict}</span>`;
 
     // Confidence
     document.getElementById('vrConfVal').textContent = `${data.confidence}%`;
@@ -211,10 +286,28 @@ function renderResults(data) {
     section.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function copyReportSummary() {
+    if (!lastVerificationData) return;
+    const d = lastVerificationData;
+    const summary = `VERIFYNEWS FACT-CHECK REPORT
+Verdict: ${d.verdict} (${d.confidence}% Confidence)
+Claim: "${d.claim.primary_claim}"
+Analysis: ${d.explanation}
+Source Agreement: ${d.source_agreement_percentage}%
+Sources: ${d.sources?.length || 0} evaluated
+Verified at: ${new Date().toLocaleString()}`;
+
+    navigator.clipboard.writeText(summary).then(() => {
+        showToast('Report copied to clipboard');
+    }).catch(() => {
+        showToast('Failed to copy report');
+    });
+}
+
 function filterSources(stance) {
     stanceFilter = stance;
     document.querySelectorAll('.sf-btn').forEach(b => {
-        b.classList.toggle('active', b.textContent.toUpperCase().includes(stance) || (stance === 'ALL' && b.textContent === 'All'));
+        b.classList.toggle('active', b.textContent.toUpperCase().includes(stance) || (stance === 'ALL' && b.textContent === 'All Sources'));
     });
     renderSourceCards();
 }
@@ -226,14 +319,14 @@ function renderSourceCards() {
     const filtered = allSources.filter(s => stanceFilter === 'ALL' || s.stance === stanceFilter);
 
     if (!filtered.length) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--t3);padding:32px 0;">No sources match this filter.</div>';
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--t3);padding:36px 0;background:#ffffff;border-radius:12px;border:1px dashed var(--b);">No sources match this stance filter.</div>';
         return;
     }
 
     filtered.forEach(src => {
         const card = document.createElement('div');
         card.className = 'src-card';
-        const pubDate = src.published_at ? new Date(src.published_at).toLocaleDateString() : 'Recent';
+        const pubDate = src.published_at ? new Date(src.published_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent';
 
         card.innerHTML = `
             <div>
@@ -248,8 +341,14 @@ function renderSourceCards() {
                 <div class="sc-snippet">"${esc(src.evidence_snippet)}"</div>
             </div>
             <div class="sc-foot">
-                <span>${esc(src.credibility_tier.replace(/_/g, ' '))}</span>
-                <a href="${esc(src.url)}" target="_blank" rel="noopener" class="sc-link">Read ↗</a>
+                <span class="sc-cred-badge">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    ${esc(src.credibility_tier.replace(/_/g, ' '))}
+                </span>
+                <a href="${esc(src.url)}" target="_blank" rel="noopener" class="sc-link">
+                    Read original source
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
             </div>
         `;
         grid.appendChild(card);
@@ -296,7 +395,9 @@ async function handleLogin(e) {
         token = d.access_token; user = d.user;
         localStorage.setItem('vn_token', token);
         localStorage.setItem('vn_user', JSON.stringify(user));
-        syncAuthUI(); closeAuthModal();
+        syncAuthUI();
+        closeAuthModal();
+        showToast('Successfully signed in');
     } catch (err) {
         errEl.textContent = err.message;
         errEl.classList.remove('hidden');
@@ -312,7 +413,7 @@ async function handleRegister(e) {
     const btn = document.getElementById('regBtn');
 
     hide('regErr');
-    btn.disabled = true; btn.textContent = 'Creating…';
+    btn.disabled = true; btn.textContent = 'Creating account…';
 
     try {
         const r = await fetch('/api/v1/auth/register', {
@@ -326,7 +427,9 @@ async function handleRegister(e) {
         token = d.access_token; user = d.user;
         localStorage.setItem('vn_token', token);
         localStorage.setItem('vn_user', JSON.stringify(user));
-        syncAuthUI(); closeAuthModal();
+        syncAuthUI();
+        closeAuthModal();
+        showToast('Account created successfully');
     } catch (err) {
         errEl.textContent = err.message;
         errEl.classList.remove('hidden');
@@ -339,6 +442,7 @@ function logoutUser() {
     localStorage.removeItem('vn_user');
     syncAuthUI();
     document.getElementById('avDropdown').classList.add('hidden');
+    showToast('Signed out');
 }
 
 // Avatar dropdown
@@ -412,9 +516,10 @@ async function handleProfileUpdate(e) {
 
         user = d; localStorage.setItem('vn_user', JSON.stringify(user));
         syncAuthUI();
-        msgEl.textContent = 'Profile updated!'; msgEl.className = 'form-msg ok';
+        msgEl.textContent = 'Profile updated successfully!'; msgEl.className = 'form-msg ok';
         document.getElementById('editCurPw').value = '';
         document.getElementById('editNewPw').value = '';
+        showToast('Profile updated');
     } catch (err) {
         msgEl.textContent = err.message; msgEl.className = 'form-msg err';
     } finally { btn.disabled = false; btn.textContent = 'Save Changes'; }
@@ -449,7 +554,7 @@ function filterHistory(verdict) {
 
 async function loadHistory() {
     const list = document.getElementById('drawerList');
-    list.innerHTML = '<div class="drawer-empty">Loading…</div>';
+    list.innerHTML = '<div class="drawer-empty">Loading records…</div>';
 
     try {
         let url = '/api/v1/history?page_size=30';
@@ -479,8 +584,8 @@ async function loadHistory() {
                 </div>
                 <div class="hc-claim">"${esc(item.primary_claim)}"</div>
                 <div class="hc-bottom">
-                    <span>${item.total_sources} sources · ${item.source_agreement_percentage}% agree</span>
-                    <button class="hc-del" onclick="deleteHistoryItem(event,${item.id})">✕</button>
+                    <span>${item.total_sources} sources · ${item.source_agreement_percentage}% agreement</span>
+                    <button class="hc-del" onclick="deleteHistoryItem(event,${item.id})" title="Delete item">✕</button>
                 </div>
             `;
             card.addEventListener('click', e => {
@@ -500,6 +605,7 @@ async function replayHistory(id) {
         const d = await r.json();
         toggleHistoryDrawer();
         renderResults(d);
+        showToast('Loaded verification from history');
     } catch (err) { showError('History Error', err.message); }
 }
 
@@ -507,15 +613,15 @@ async function deleteHistoryItem(e, id) {
     e.stopPropagation();
     try {
         const r = await fetch(`/api/v1/history/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
-        if (r.ok) { loadHistory(); refreshMe(); }
+        if (r.ok) { loadHistory(); refreshMe(); showToast('Item deleted'); }
     } catch (err) { console.error('Delete failed', err); }
 }
 
 async function clearAllHistory() {
-    if (!confirm('Delete all verification history? This cannot be undone.')) return;
+    if (!confirm('Are you sure you want to delete all verification history? This cannot be undone.')) return;
     try {
         const r = await fetch('/api/v1/history', { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
-        if (r.ok) { loadHistory(); refreshMe(); }
+        if (r.ok) { loadHistory(); refreshMe(); showToast('History cleared'); }
     } catch (err) { console.error('Clear failed', err); }
 }
 
@@ -528,4 +634,7 @@ function esc(str) {
     return d.innerHTML;
 }
 
-function hide(id) { document.getElementById(id).classList.add('hidden'); }
+function hide(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+}
